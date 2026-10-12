@@ -38,14 +38,44 @@
   var tabs = root.querySelector('.flow');
   var vp = root.querySelector('.viewport');
   var notes = root.querySelector('.notes');
-  var full = root.querySelector('.frame-bar a');
+  var bar = root.querySelector('.frame-bar');
+  var frame = root.querySelector('.frame');
+  var protoEl = root.querySelector('.proto');
+  // Replace any "open in a new window" link with an in-page Expand toggle
+  var oldLink = bar && bar.querySelector('a');
+  var expBtn = document.createElement('button');
+  expBtn.type = 'button'; expBtn.className = 'expand';
+  expBtn.innerHTML = '<span>Expand</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  expBtn.setAttribute('aria-expanded', 'false');
+  if (oldLink) oldLink.replaceWith(expBtn); else if (bar) bar.appendChild(expBtn);
+  var shade = document.createElement('div'); shade.className = 'frame-shade'; shade.hidden = true;
+  document.body.appendChild(shade);
+  function setExpanded(on) {
+    frame.classList.toggle('expanded', on);
+    shade.hidden = !on;
+    document.documentElement.classList.toggle('proto-open', on);
+    expBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    expBtn.querySelector('span').textContent = on ? 'Close' : 'Expand';
+    fit();
+    if (on) expBtn.focus();
+  }
+  expBtn.addEventListener('click', function () { setExpanded(!frame.classList.contains('expanded')); });
+  shade.addEventListener('click', function () { setExpanded(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && frame.classList.contains('expanded')) setExpanded(false); });
   var url = root.querySelector('.frame-bar .url');
   var iframe = null, ready = false, active = null;
 
-  if (P.device) root.querySelector('.proto').classList.add('device-' + P.device);
-  if (P.bg) vp.style.background = P.bg;
-  vp.style.setProperty('--vw', P.vw || 1440);
-  vp.style.setProperty('--vh', P.vh || 900);
+  // Each screen can set its own canvas: a desktop app, or a phone
+  var dims = { vw: P.vw || 1440, vh: P.vh || 900, device: P.device || '', bg: P.bg || '' };
+  function applyDims(s) {
+    dims = { vw: s.vw || P.vw || 1440, vh: s.vh || P.vh || 900, device: s.device || P.device || '', bg: s.bg || P.bg || '' };
+    protoEl.classList.toggle('device-phone', dims.device === 'phone');
+    expBtn.hidden = dims.device === 'phone';
+    vp.style.background = dims.bg || '';
+    vp.style.setProperty('--vw', dims.vw);
+    vp.style.setProperty('--vh', dims.vh);
+    fit();
+  }
   tabs.style.setProperty('--n', P.screens.length);
 
   // Tabs
@@ -97,13 +127,19 @@
       b.tabIndex = on ? 0 : -1;
     });
     renderNotes(s);
+    applyDims(s);
     if (url) url.textContent = (P.host || 'prototype') + ' / ' + s.name;
-    if (full) full.href = P.app + '#' + id;
+    if (dims.device === 'phone' && frame.classList.contains('expanded')) setExpanded(false);
     send(screenMsg(s));
   }
 
   // Scale the fixed-size prototype to the frame width
-  function fit() { vp.style.setProperty('--scale', vp.clientWidth / (P.vw || 1440)); }
+  function fit() {
+    var w = vp.clientWidth, h = vp.clientHeight;
+    var sc = frame.classList.contains('expanded') ? Math.min(w / dims.vw, h / dims.vh) : w / dims.vw;
+    vp.style.setProperty('--scale', sc);
+    vp.style.setProperty('--ox', Math.max(0, (w - dims.vw * sc) / 2) + 'px');
+  }
   if ('ResizeObserver' in window) new ResizeObserver(fit).observe(vp); else window.addEventListener('resize', fit);
   fit();
 

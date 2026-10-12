@@ -267,7 +267,7 @@
           <div class="frame-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">MediScribe</span><a href="mediscribe-app.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
           <div class="viewport"><div class="loading">Loading the prototype…</div></div>
         </div>
-        <p class="proto-hint">Best on a laptop or larger. On a phone, open it full screen.</p>
+        <p class="proto-hint">On a smaller screen, use Expand to see it bigger.</p>
       </div>
       <div class="notes" aria-live="polite"></div>
     </div>
@@ -508,12 +508,12 @@ window.CS_PROTO = {
         { n: 4, t: 'Changes are labelled', d: 'Dose increased from 5mg, with refills counted.', sel: '#sc-prescription', txt: 'Dose increased from 5mg', x: 0, y: .5, dx: -14 },
         { n: 5, t: 'Sent to the patient’s app', d: 'A QR code any registered pharmacy can dispense from.', sel: '#sc-prescription', txt: 'QR code sent to patient app', x: 0, y: .5, dx: -14 }
       ] },
-    { id: 'patient', step: 'Plain language', name: 'Patient app', cap: 'Nine screens, for the patient', call: ['showPhone', 2],
+    { id: 'patient', step: 'Plain language', name: 'Patient app', cap: 'Nine screens, for the patient', call: ['showPhone', 2], device: 'phone', vw: 440, vh: 780, bg: '#F5F8FA',
       kicker: 'For the patient · Patient app', title: 'Reminders that <em>set themselves.</em>',
       marks: [
         { n: 1, t: 'Timed from the prescription', d: '"Once daily, morning" becomes 8:00 AM daily, with the reminder already set.', sel: '#ph-2', txt: '8:00 AM daily', x: 0, y: .5, dx: -14 },
         { n: 2, t: 'Dose changes, in plain words', d: 'Amlodipine went up to 10mg today, and the app says so.', sel: '#ph-2', txt: 'Amlodipine increased to 10mg', x: 0, y: .5, dx: -14 },
-        { n: 3, t: 'Updated on its own', d: '"Your reminders have been updated." Nine screens in all: use the tabs above the phone to see the rest.', sel: '#ph-2', txt: 'reminders have been updated', x: 1, y: .5, dx: 14 }
+        { n: 3, t: 'Updated on its own', d: '"Your reminders have been updated." Nine screens in all: tap the tabs above the phone to see the rest.', sel: '#ph-2', txt: 'reminders have been updated', x: 1, y: .5, dx: 14 }
       ] }
   ]
 };

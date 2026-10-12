@@ -25,6 +25,31 @@
 .longform .fadeout{position:absolute;left:0;right:0;bottom:0;height:90px;border-radius:0 0 14px 14px;background:linear-gradient(transparent,var(--c-dark-2))}
 .longform .tag{position:absolute;left:-14px}
 @media (max-width:760px){.longform .tag{left:12px}}
+/* before / after registration form, with real fields */
+.oldform{position:relative;background:#fff;border:1px solid var(--c-line);border-radius:12px;padding:18px 18px 16px;font-family:Arial,Helvetica,sans-serif}
+.oldform .label{display:block;margin-bottom:12px}
+.oldform .of{margin-bottom:9px}
+.oldform .of label{display:block;font-size:11px;color:#555;margin-bottom:3px}
+.oldform .in{display:block;height:26px;line-height:24px;padding:0 8px;border:1px solid #CFCFCF;border-radius:2px;font-size:12px;color:#222;background:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.oldform .in.empty{color:#AAA}
+.oldform .more{margin:10px 0 12px;padding:10px;border:1px dashed #CFCFCF;border-radius:4px;text-align:center;font-size:11.5px;color:#888}
+.oldform .of-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.oldform .sub{display:inline-flex;align-items:center;height:28px;padding:0 14px;background:#E4E4E4;border:1px solid #BDBDBD;border-radius:2px;font-size:12px;color:#333}
+.oldform .generr{font-size:11.5px;color:#C8102E}
+.after .grp{padding:12px 14px 14px}
+.after .gt{display:block;margin-bottom:10px}
+.after .nf{flex:1;min-width:0;margin-top:8px}
+.after .nf2{display:flex;gap:10px}
+.after .nf label{display:block;font-size:11px;font-weight:600;color:var(--c-ink);margin-bottom:4px;font-family:'Inter',sans-serif}
+.after .nf label b{color:var(--c-acc);font-weight:600}
+.after .nf .in{display:block;height:30px;line-height:28px;padding:0 9px;border:1px solid var(--c-line);border-radius:6px;font-size:12px;color:var(--c-ink);background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.after .nf.err .in{border-color:var(--c-acc);background:var(--c-acc-tint);color:#B0B0B0}
+.after .nf em{display:block;margin-top:4px;font-style:normal;font-size:10.5px;color:var(--c-acc);line-height:1.3}
+.after .side .aid{margin-top:12px;padding-top:12px;border-top:1px solid var(--c-line)}
+.after .side .aid span{display:block;font-size:11px}
+.after .side .aid b{display:block;font:600 11px/1.4 ui-monospace,Menlo,monospace;color:var(--c-acc);margin-top:2px}
+.after .side .aid small{font-size:10px}
+@media (max-width:760px){.after .nf2{flex-direction:column;gap:0}}
 </style>
 </head>
 <body>
@@ -167,7 +192,7 @@
           <div class="frame-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">Asset Management Portal</span><a href="bakerhughes-app.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
           <div class="viewport"><div class="loading">Loading the prototype…</div></div>
         </div>
-        <p class="proto-hint">Best on a laptop or larger. On a phone, open it full screen.</p>
+        <p class="proto-hint">On a smaller screen, use Expand to see it bigger.</p>
       </div>
       <div class="notes" aria-live="polite"></div>
     </div>
@@ -181,34 +206,47 @@
       <p class="eyebrow">Screen 3 · Asset registration</p>
       <h2 class="h2" id="reg-h">The form that caused the most problems, <em>and needed the most work.</em></h2>
     </div>
-    <div class="ba rv" aria-label="Before and after layout of the registration form">
-      <div>
-        <div class="sheet" aria-hidden="true">
+    <div class="ba rv">
+      <figure style="margin:0">
+        <div class="oldform" aria-label="The old registration form: one long, ungrouped list of fields">
           <span class="label">Before</span>
-          <div class="ln s"></div><div class="ln f"></div><div class="ln s"></div><div class="ln f"></div><div class="ln m"></div><div class="ln f"></div>
-          <div class="ln s"></div><div class="ln f"></div><div class="ln s"></div><div class="ln f"></div><div class="ln m"></div><div class="ln f"></div>
-          <div class="ln s"></div><div class="ln f"></div>
+          <div class="of"><label>Asset Name</label><span class="in">NovaLT16 Gas Turbine</span></div>
+          <div class="of"><label>Manufacturer Part No.</label><span class="in">GE-NLT16-0042</span></div>
+          <div class="of"><label>Serial Number</label><span class="in empty"></span></div>
+          <div class="of"><label>Region</label><span class="in">Gulf of Mexico</span></div>
+          <div class="of"><label>Category</label><span class="in">Turbomachinery</span></div>
+          <div class="of"><label>Cost Centre</label><span class="in">CC-GOM-COMP-004</span></div>
+          <div class="of"><label>Commissioning Date</label><span class="in empty">dd / mm / yyyy</span></div>
+          <div class="of"><label>Project Code</label><span class="in empty"></span></div>
+          <div class="of"><label>Model No.</label><span class="in">NLT16-GOM-2022</span></div>
+          <div class="more">…and 31 more fields, in no particular order</div>
+          <div class="of-foot"><span class="sub">Submit</span><span class="generr">Error: This field is required.</span></div>
         </div>
-        <p class="ba-cap">One long page. 40+ fields visible at once, no grouping, no validation until submit. The highest abandonment and error rates on the platform.</p>
-      </div>
+        <figcaption class="ba-cap">One long page. 40+ fields visible at once, no grouping, and nothing to say which ones are required until submit fails with a generic error.</figcaption>
+      </figure>
       <div class="ba-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div>
-        <div class="after">
-          <div aria-hidden="false">
-            <div class="grp"><span class="gt">1 · Classification</span><div class="ln f" aria-hidden="true"></div></div>
-            <div class="grp"><span class="gt">2 · Asset details</span><div class="ln f" aria-hidden="true"></div><div class="ln f" aria-hidden="true"></div></div>
-            <div class="grp"><span class="gt">3 · Location &amp; assignment</span><div class="ln f" aria-hidden="true"></div></div>
+      <figure style="margin:0">
+        <div class="after" aria-label="The redesigned registration form: three named sections and a progress sidebar">
+          <div>
+            <div class="grp"><span class="gt">1 · Classification</span>
+              <div class="nf2"><div class="nf"><label>Category <b>*</b></label><span class="in">Turbomachinery</span></div><div class="nf"><label>Asset Class <b>*</b></label><span class="in">Critical, Class A</span></div></div></div>
+            <div class="grp"><span class="gt">2 · Asset details</span>
+              <div class="nf"><label>Asset Name <b>*</b></label><span class="in">NovaLT16 Gas Turbine</span></div>
+              <div class="nf2"><div class="nf err"><label>Serial Number <b>*</b></label><span class="in">e.g. BH-SN-22-004412</span><em>⚠ Required for Class A assets</em></div><div class="nf err"><label>Commissioning Date <b>*</b></label><span class="in">dd / mm / yyyy</span><em>⚠ Required for compliance tracking</em></div></div></div>
+            <div class="grp"><span class="gt">3 · Location &amp; assignment</span>
+              <div class="nf2"><div class="nf"><label>Region <b>*</b></label><span class="in">Gulf of Mexico</span></div><div class="nf"><label>Platform <b>*</b></label><span class="in">Compression Train B</span></div></div></div>
           </div>
           <div class="side">
             <span class="label">Progress</span>
-            <div class="st on"><i></i>You are here</div>
-            <div class="st"><i></i>Next</div>
-            <div class="st"><i></i>Then</div>
-            <div class="warn">Asset ID auto-generated. Flags incomplete fields before submission.</div>
+            <div class="st on"><i></i>Asset identification</div>
+            <div class="st"><i></i>Technical specs</div>
+            <div class="st"><i></i>Maintenance schedule</div>
+            <div class="aid"><span>Asset ID</span><b>BH-TRB-2022-0249</b><small>Auto-generated</small></div>
+            <div class="warn">⚠ 2 fields incomplete</div>
           </div>
         </div>
-        <p class="ba-cap">Three named sections, a progress sidebar, and problems surfaced while the engineer is still on the form.</p>
-      </div>
+        <figcaption class="ba-cap">Three named sections, required fields marked, and specific errors while the engineer is still on the form.</figcaption>
+      </figure>
     </div>
   </div>
 </section>

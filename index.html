@@ -59,12 +59,11 @@ a:hover{color:#fff}
   box-shadow:0 0 0 1px var(--line),0 30px 60px -20px rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center}
 .vinyl::after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 40%,transparent 60%,rgba(255,255,255,.04))}
 .vinyl .label{width:34%;aspect-ratio:1/1;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
-.vinyl .label{position:relative;color:var(--on-accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
-.vinyl .label .hole{width:10px;height:10px;border-radius:50%;background:var(--bg)}
-.vinyl .label .lab-t,.vinyl .label .lab-b{position:absolute;left:0;right:0;text-align:center;white-space:nowrap}
-.vinyl .label .lab-t{top:16%;font-size:clamp(8px,1vw,12px);font-weight:500}
-.vinyl .label .lab-b{bottom:18%;font-size:clamp(6px,.62vw,8px)}
-.vinyl .label::before{content:"";position:absolute;top:8%;left:50%;width:2px;height:7%;margin-left:-1px;background:var(--on-accent);border-radius:2px}
+.vinyl .label{position:relative;color:var(--on-accent)}
+.vinyl .label svg{width:100%;height:100%;display:block;overflow:visible}
+.vinyl .label .ring{font:700 9.4px var(--sans);letter-spacing:0;fill:currentColor}
+.vinyl .label .side{font:500 5.4px var(--mono);letter-spacing:.12em;fill:currentColor}
+.vinyl .label .rpm{font:500 5px var(--mono);letter-spacing:.08em;fill:currentColor;opacity:.7}
 .sleeve{position:relative;aspect-ratio:1/1;background:var(--accent);color:var(--on-accent);border-radius:4px;padding:clamp(20px,4vw,36px);display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .sleeve-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .sleeve-name{min-width:0;font-size:clamp(46px,6.6vw,80px);line-height:.86;letter-spacing:-.05em;font-weight:700}
@@ -218,7 +217,15 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
 
 <header class="hero">
   <div class="sleeve-wrap" aria-hidden="true">
-    <div class="vinyl"><div class="label"><span class="lab-t">Side A</span><span class="hole"></span><span class="lab-b">Ankush Meena &middot; 33&#8531;</span></div></div>
+    <div class="vinyl"><div class="label"><svg viewBox="0 0 100 100" aria-hidden="true">
+      <defs><path id="lab-ring" d="M50,50 m-35,0 a35,35 0 1,1 70,0 a35,35 0 1,1 -70,0"/></defs>
+      <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".6"/>
+      <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width=".6"/>
+      <text class="ring"><textPath href="#lab-ring" textLength="216" lengthAdjust="spacing">ANKUSH MEENA &#9679; PRODUCT DESIGNER &#9679;</textPath></text>
+      <text class="side" x="50" y="40" text-anchor="middle">SIDE A</text>
+      <circle cx="50" cy="50" r="3.4" fill="#0F0F0F"/>
+      <text class="rpm" x="50" y="64" text-anchor="middle">33&#8531; RPM</text>
+    </svg></div></div>
     <div class="sleeve">
       <div class="sleeve-top">
         <span class="sleeve-name">Ankush<br>Meena</span>

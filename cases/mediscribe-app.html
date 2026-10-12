@@ -421,6 +421,14 @@ body { font-family: 'Sora', sans-serif; background: #F0F4F6; color: var(--body-t
 }
 </style>
 
+<style id="embed-patient">
+html.embed #sc-patient .pa-wrap2{padding:18px 14px;min-height:100vh}
+html.embed #sc-patient .pa-header-left{display:none}
+html.embed #sc-patient .pa-header-row{display:block;margin-bottom:0}
+html.embed #sc-patient .phone-tab-row{justify-content:center;gap:6px;margin-bottom:16px}
+html.embed #sc-patient .phone-tab{padding:6px 11px;font-size:11px}
+html.embed #sc-patient .pa-phone-label{display:none}
+</style>
 </head>
 <body>
 
@@ -1849,6 +1857,11 @@ function go(name) {
   window.scrollTo(0, 0);
 }
 var h = location.hash.slice(1); if (h && document.getElementById('sc-' + h)) go(h);
+</script>
+<script>
+// Switching phones inside the prototype clears the previous phone's markers
+(function(){ var sp = window.showPhone; if (typeof sp !== 'function') return;
+  window.showPhone = function (i) { sp(i); document.querySelectorAll('.cm').forEach(function (e) { e.remove(); }); }; })();
 </script>
 <script src="proto.js"></script>
 </body>

@@ -145,10 +145,17 @@ a{color:inherit}
 .frame-bar .dots{display:flex;gap:6px}
 .frame-bar .dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18)}
 .frame-bar .url{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
-.frame-bar a{color:var(--c-dark-ink);text-decoration:none;white-space:nowrap;padding:6px 10px;border-radius:999px;border:1px solid var(--c-dark-line)}
-.frame-bar a:hover{border-color:var(--c-dark-ink)}
-.viewport{position:relative;width:100%;aspect-ratio:var(--vw,1440)/var(--vh,900);overflow:hidden;background:#fff}
-.viewport iframe{max-width:none;position:absolute;left:0;top:0;width:calc(var(--vw,1440) * 1px);height:calc(var(--vh,900) * 1px);border:0;transform-origin:0 0;transform:scale(var(--scale,.6))}
+.frame-bar .expand{display:inline-flex;align-items:center;gap:8px;color:var(--c-dark-ink);font:500 12px/1 var(--s-mono);white-space:nowrap;padding:8px 12px;border-radius:999px;border:1px solid var(--c-dark-line);background:transparent;cursor:pointer;transition:border-color .2s,background-color .2s}
+.frame-bar .expand:hover{border-color:var(--c-dark-ink);background:rgba(255,255,255,.06)}
+.frame-bar .expand svg{width:13px;height:13px}
+.frame-bar .expand[hidden]{display:none}
+.frame.expanded{position:fixed;inset:clamp(8px,2vw,24px);z-index:90;display:flex;flex-direction:column;box-shadow:0 40px 120px -20px rgba(0,0,0,.8)}
+.frame.expanded .viewport{flex:1;aspect-ratio:auto}
+.frame-shade{position:fixed;inset:0;z-index:89;background:rgba(10,10,12,.72);backdrop-filter:blur(4px)}
+.frame-shade[hidden]{display:none}
+html.proto-open,html.proto-open body{overflow:hidden}
+.viewport{position:relative;width:100%;aspect-ratio:var(--vw,1440)/var(--vh,900);overflow:hidden;background:#fff;transition:aspect-ratio .3s}
+.viewport iframe{max-width:none;position:absolute;left:var(--ox,0px);top:0;width:calc(var(--vw,1440) * 1px);height:calc(var(--vh,900) * 1px);border:0;transform-origin:0 0;transform:scale(var(--scale,.6))}
 .viewport .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:500 12px/1 var(--s-mono);color:var(--c-muted)}
 .proto-hint{margin-top:12px;font-size:13px;color:var(--c-muted)}
 
