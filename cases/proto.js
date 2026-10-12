@@ -12,7 +12,7 @@
   css.textContent =
     'html.embed .top-nav,html.embed .app-topbar{display:none!important}' +
     'html.embed .page-wrap{margin-top:0!important}html.embed body{padding-top:0!important}' +
-    'html.embed .app-shell{height:100vh!important}' +
+    'html.embed .app-shell,html.embed .app{height:100vh!important}' +
     '.cm{position:absolute;z-index:9999;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;' +
     'background:var(--cm-c,#C8102E);color:#fff;font:700 12px/26px system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;' +
     'box-shadow:0 0 0 3px #fff,0 6px 16px -4px rgba(0,0,0,.45);pointer-events:none;' +
@@ -35,10 +35,24 @@
 
   function clear() { document.querySelectorAll('.cm').forEach(function (e) { e.remove(); }); }
 
+  // A marker targets a CSS selector, or the deepest visible element containing some text
+  function find(m) {
+    if (m.sel && !m.txt) return document.querySelectorAll(m.sel)[m.i || 0];
+    var scope = m.sel ? document.querySelectorAll(m.sel)[m.i || 0] : document.body;
+    if (!scope) return null;
+    var hits = [], all = scope.querySelectorAll('*');
+    for (var j = 0; j < all.length; j++) {
+      var e = all[j];
+      if (e.children.length && Array.prototype.some.call(e.children, function (c) { return c.textContent.indexOf(m.txt) > -1; })) continue;
+      if (e.textContent.indexOf(m.txt) > -1 && e.getClientRects().length) hits.push(e);
+    }
+    return hits[m.ti || 0] || null;
+  }
+
   function place() {
     clear();
     marks.forEach(function (m, k) {
-      var el = document.querySelectorAll(m.sel)[m.i || 0];
+      var el = find(m);
       if (!el || !el.getClientRects().length) return;
       var r = el.getBoundingClientRect();
       var host = scrollParent(el) || document.body;
@@ -49,8 +63,14 @@
       d.setAttribute('data-n', m.n);
       d.textContent = m.n;
       d.style.animationDelay = (k * 60) + 'ms';
-      d.style.left = (r.left - hr.left + (host.scrollLeft || 0) + (m.x || 0) * r.width + (m.dx || 0)) + 'px';
-      d.style.top = (r.top - hr.top + (host.scrollTop || 0) + (m.y || 0) * r.height + (m.dy || 0)) + 'px';
+      var L = r.left - hr.left + (host.scrollLeft || 0) + (m.x || 0) * r.width + (m.dx || 0);
+      var T = r.top - hr.top + (host.scrollTop || 0) + (m.y || 0) * r.height + (m.dy || 0);
+      // keep the whole marker inside its scroll container so it is never clipped
+      var W = host === document.body ? document.documentElement.clientWidth : host.clientWidth;
+      L = Math.max(15, Math.min(W - 15, L));
+      T = Math.max(15, T);
+      d.style.left = L + 'px';
+      d.style.top = T + 'px';
       host.appendChild(d);
     });
   }
@@ -71,9 +91,11 @@
   }
 
   // Wrap the page's own show() so clicks inside the prototype keep the tabs outside in sync
+  var NAV = typeof window.go === 'function' && typeof window.show !== 'function' ? 'go' : 'show';
   function hook() {
-    if (typeof window.show !== 'function' || window.show.__bridged) return;
-    var orig = window.show;
+    NAV = typeof window.show === 'function' ? 'show' : (typeof window.go === 'function' ? 'go' : NAV);
+    if (typeof window[NAV] !== 'function' || window[NAV].__bridged) return;
+    var orig = window[NAV];
     var wrapped = function (name) {
       var r = orig.apply(this, arguments);
       if (current !== name) { current = name; marks = []; clear(); }
@@ -81,7 +103,7 @@
       return r;
     };
     wrapped.__bridged = true;
-    window.show = wrapped;
+    window[NAV] = wrapped;
   }
 
   window.addEventListener('message', function (e) {
@@ -94,8 +116,9 @@
       }
       if (current !== m.name) {
         current = m.name;
-        try { window.__bridgeSilent = true; window.show(m.name); } finally { window.__bridgeSilent = false; }
+        try { window.__bridgeSilent = true; window[NAV](m.name); } finally { window.__bridgeSilent = false; }
       }
+      if (m.call && typeof window[m.call[0]] === 'function') window[m.call[0]].apply(window, m.call.slice(1));
       marks = m.marks || [];
       requestAnimationFrame(function () { requestAnimationFrame(place); });
     } else if (m.type === 'hl') {

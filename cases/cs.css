@@ -162,6 +162,11 @@ a{color:inherit}
 .notes .fade{animation:fade .4s var(--ease) both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
+/* phone prototypes */
+.proto.device-phone{grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:clamp(28px,6vw,80px);align-items:center}
+.proto.device-phone .frame{max-width:420px}
+@media (max-width:980px){.proto.device-phone{grid-template-columns:minmax(0,1fr)}.proto.device-phone .frame{margin:0 auto;width:100%}}
+
 /* before / after schematic */
 .ba{display:grid;grid-template-columns:minmax(0,1fr) 56px minmax(0,1.25fr);gap:12px;align-items:center}
 .ba-arrow{display:flex;justify-content:center;color:var(--c-acc)}

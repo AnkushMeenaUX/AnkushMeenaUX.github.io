@@ -42,6 +42,8 @@
   var url = root.querySelector('.frame-bar .url');
   var iframe = null, ready = false, active = null;
 
+  if (P.device) root.querySelector('.proto').classList.add('device-' + P.device);
+  if (P.bg) vp.style.background = P.bg;
   vp.style.setProperty('--vw', P.vw || 1440);
   vp.style.setProperty('--vh', P.vh || 900);
   tabs.style.setProperty('--n', P.screens.length);
@@ -68,6 +70,7 @@
 
   function screenById(id) { for (var i = 0; i < P.screens.length; i++) if (P.screens[i].id === id) return P.screens[i]; return null; }
 
+  function screenMsg(s) { return { type: 'screen', name: s.id, marks: s.marks, color: P.color, ring: P.ring, call: s.call }; }
   function send(msg) { if (iframe && ready) iframe.contentWindow.postMessage(msg, '*'); }
 
   function renderNotes(s) {
@@ -96,7 +99,7 @@
     renderNotes(s);
     if (url) url.textContent = (P.host || 'prototype') + ' / ' + s.name;
     if (full) full.href = P.app + '#' + id;
-    send({ type: 'screen', name: id, marks: s.marks, color: P.color, ring: P.ring });
+    send(screenMsg(s));
   }
 
   // Scale the fixed-size prototype to the frame width
@@ -110,11 +113,10 @@
     if (m.type === 'proto-ready') {
       ready = true;
       var l = vp.querySelector('.loading'); if (l) l.remove();
-      var s = screenById(active);
-      send({ type: 'screen', name: active, marks: s.marks, color: P.color, ring: P.ring });
+      send(screenMsg(screenById(active)));
     } else if (m.type === 'screen-changed' && screenById(m.name)) {
       if (m.name !== active) select(m.name, false);
-      else { var cur = screenById(active); send({ type: 'screen', name: active, marks: cur.marks, color: P.color, ring: P.ring }); }
+      else send(screenMsg(screenById(active)));
     }
   });
 

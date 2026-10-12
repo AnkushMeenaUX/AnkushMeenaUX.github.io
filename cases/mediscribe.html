@@ -1,1991 +1,523 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediScribe — UX Case Study</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MediScribe, a case study by Ankush Meena</title>
+<meta name="description" content="An AI consultation scribe for Capgemini's internal health clinic: a doctor screen that asks for nothing, a summary the doctor signs, and a plain-language app for the patient.">
+<meta property="og:title" content="MediScribe, a case study by Ankush Meena">
+<meta property="og:description" content="A tool that listens, so doctors don't have to type.">
+<meta property="og:image" content="../thumbnails/mediscribe-cover.jpg">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cs.css">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --teal: #0A7B74;
-  --teal-light: #0D9B92;
-  --teal-dark: #065954;
-  --teal-lt: #E6F4F3;
-  --teal-mid: #C5E8E6;
-  --ink: #0F1923;
-  --ink-soft: #243140;
-  --body-txt: #3A4A56;
-  --muted: #7A8D9C;
-  --border: #DDE6EA;
-  --border2: #C8D6DD;
-  --surface: #F5F8FA;
-  --surface2: #EDF2F5;
-  --white: #FFFFFF;
-  --red: #D64545;
-  --red-lt: #FDF2F2;
-  --amber: #C47A1A;
-  --amber-lt: #FEF6E8;
-  --green: #1A7A3F;
-  --green-lt: #E8F5EE;
-  --blue: #1F5FA6;
-  --blue-lt: #EEF4FD;
-  --pulse: #E53E3E;
+:root{
+  --c-sans:'Sora',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --c-em-font:'Lora',Georgia,serif;
+  --c-bg:#F2F6F7; --c-line:#DCE5E8; --c-muted:#647884; --c-ink:#0F1923; --c-body:#3A4A56;
+  --c-dark:#0F1E26; --c-dark-2:#172B35;
+  --c-acc:#0A7B74; --c-acc-d:#56C8BA; --c-acc-tint:#E6F4F3;
 }
-html { scroll-behavior: smooth; }
-body { font-family: 'Sora', sans-serif; background: #F0F4F6; color: var(--body-txt); }
+.h1,.h2{letter-spacing:-.03em}
+.teal{background:#0A7B74;color:rgba(255,255,255,.82)}
+.teal .h2{color:#fff}
+.teal .h2 em,.teal .eyebrow{color:#C4F0EA}
+.teal p{color:rgba(255,255,255,.82)}
 
-/* TOP NAV */
-.top-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: var(--ink); height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; border-bottom: 2px solid var(--teal);
+/* a ten-minute consultation */
+.tenmin{margin-top:clamp(36px,5vw,56px)}
+.tenmin .bar{display:grid;grid-template-columns:1fr 1fr;gap:4px;height:84px;border-radius:12px;overflow:hidden}
+.tenmin .bar div{padding:16px 20px;display:flex;flex-direction:column;justify-content:center}
+.tenmin .bar b{font-size:18px;color:#fff}
+.tenmin .bar span{font-size:13px;color:rgba(255,255,255,.7)}
+.tenmin .listen{background:var(--c-acc)}
+.tenmin .type{background:var(--c-dark)}
+.tenmin .axis{display:flex;justify-content:space-between;margin-top:10px;font:500 11px/1 var(--s-mono);color:var(--c-muted)}
+.brief{margin-top:clamp(32px,4vw,44px);padding:22px 26px;border-left:3px solid var(--c-acc);background:var(--c-card);border-radius:0 12px 12px 0}
+.brief .label{color:var(--c-acc);display:block;margin-bottom:8px}
+.brief p{font-size:clamp(17px,1.6vw,20px);font-weight:600;color:var(--c-ink);line-height:1.45}
+.brief p em{font-family:var(--c-em-font);font-style:italic;font-weight:400;color:var(--c-acc)}
+
+/* the pattern, every visit */
+.lanes{margin-top:clamp(36px,5vw,56px);display:grid;grid-template-columns:150px repeat(6,minmax(0,1fr));row-gap:14px;column-gap:10px;align-items:stretch}
+.lanes .lane{font:500 11px/1.4 var(--s-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);align-self:center}
+.lanes .st{background:var(--c-card);border:1px solid var(--c-line);border-radius:12px;padding:14px;font-size:14px;line-height:1.4;color:var(--c-ink);font-weight:600}
+.lanes .st i{display:flex;width:24px;height:24px;border-radius:50%;align-items:center;justify-content:center;font:700 12px/1 var(--c-sans);font-style:normal;margin-bottom:10px;background:var(--c-acc);color:#fff}
+.lanes .st.scr{background:var(--c-dark);border-color:var(--c-dark);color:#fff}
+.lanes .st.scr i{background:#D64545}
+.lanes .gap{border:1px dashed var(--c-line);border-radius:12px;opacity:.6}
+.lanes-cap{margin-top:22px;max-width:62ch}
+.lanes-cap em{font-family:var(--c-em-font);font-style:italic;color:var(--c-acc)}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,40px)}
+.rules .n{font-family:var(--c-em-font);font-style:italic;font-size:72px;line-height:1;color:var(--c-acc-d)}
+.rules .h3{color:#fff;margin:18px 0 10px;font-size:20px}
+
+/* what we cut */
+.cut{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.cut li{display:flex;gap:12px;align-items:baseline;color:var(--c-ink);font-weight:600;text-decoration:line-through;text-decoration-color:rgba(214,69,69,.6);text-decoration-thickness:1.5px}
+.cut li::before{content:"×";color:#D64545;font-weight:700;text-decoration:none;display:inline-block}
+.rulebox{background:var(--c-acc);color:#fff;border-radius:16px;padding:clamp(28px,4vw,44px)}
+.rulebox .label{color:#C4F0EA;display:block;margin-bottom:16px}
+.rulebox p{font-family:var(--c-em-font);font-style:italic;font-size:clamp(24px,2.6vw,32px);line-height:1.3;color:#fff}
+.rulebox small{display:block;margin-top:22px;font:500 11px/1.4 var(--s-mono);letter-spacing:.04em;text-transform:uppercase;color:#C4F0EA}
+
+/* one wrong line */
+.came{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.came li{display:flex;align-items:center;gap:12px;font-weight:600;color:#fff}
+.came li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c-acc-d)}
+.draft{background:var(--c-dark-2);border:1px solid var(--c-dark-line);border-radius:14px;padding:22px}
+.draft-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-weight:600;color:#fff;font-size:15px}
+.draft-h span{font:500 10px/1 var(--s-mono);padding:6px 8px;border-radius:6px;background:rgba(86,200,186,.16);color:var(--c-acc-d);text-transform:uppercase;letter-spacing:.04em}
+.draft .ln{height:10px;border-radius:5px;background:rgba(255,255,255,.1);margin:11px 0}
+.draft .ln.bad{background:#D64545;position:relative}
+.draft .ln.bad::after{content:"One wrong line";position:absolute;right:0;top:50%;transform:translate(0,-50%);font:600 11px/1 var(--c-sans);color:#fff;background:#D64545;padding:6px 9px;border-radius:999px;box-shadow:0 0 0 3px var(--c-dark-2)}
+.draft .ln.dim{opacity:.45}
+.draft-cap{margin-top:14px;font-family:var(--c-em-font);font-style:italic;color:var(--c-dark-muted)}
+.six{display:flex;flex-wrap:wrap;gap:8px;margin-top:clamp(32px,4vw,44px);align-items:center}
+.six .label{margin-right:8px}
+.six span.s{padding:8px 12px;border-radius:999px;border:1px solid var(--c-dark-line);color:#fff;font-size:13px;font-weight:500}
+.six span.s b{color:var(--c-acc-d);font-weight:600;margin-right:6px;font-family:var(--s-mono);font-size:11px}
+
+/* two languages */
+.lang{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);gap:12px 10px;align-items:stretch}
+.lang .hd{font:500 11px/1.4 var(--s-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--c-muted);padding:0 4px 4px}
+.lang .clin{background:var(--c-card);border:1px solid var(--c-line);border-radius:12px;padding:16px 18px}
+.lang .clin code{display:block;font:500 12px/1.4 var(--s-mono);color:var(--c-acc);margin-bottom:6px}
+.lang .clin b{display:block;color:var(--c-ink);font-size:15px}
+.lang .clin span{display:block;font-size:13px;color:var(--c-muted);margin-top:4px}
+.lang .ar{display:flex;align-items:center;justify-content:center;color:var(--c-acc)}
+.lang .plain{background:var(--c-acc-tint);border:1px solid #C5E8E6;border-radius:12px;padding:16px 18px}
+.lang .plain b{display:block;color:var(--c-ink);font-size:15px}
+.lang .plain span{display:block;font-size:14px;color:var(--c-body);margin-top:4px;line-height:1.5}
+.lang-cap{margin-top:24px;max-width:70ch}
+.lang-cap em{font-family:var(--c-em-font);font-style:italic;color:var(--c-acc)}
+
+/* patient app list */
+.ticks{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.ticks li{display:flex;gap:12px;align-items:flex-start;color:var(--c-ink);font-weight:500}
+.ticks li::before{content:"✓";flex:none;width:22px;height:22px;border-radius:50%;background:var(--c-acc);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+
+/* validation loop */
+.loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:clamp(32px,4vw,48px);counter-reset:lp}
+.loop div{position:relative;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:20px}
+.loop div.hot{background:#0F1E26;border-color:#0F1E26}
+.loop i{font:500 11px/1 var(--s-mono);font-style:normal;color:#C4F0EA}
+.loop b{display:block;color:#fff;margin:12px 0 6px;font-size:16px}
+.loop span{font-size:14px;color:rgba(255,255,255,.75)}
+.loop div:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translate(50%,-50%);color:#C4F0EA;z-index:1}
+
+@media (max-width:900px){
+  .lanes{grid-template-columns:minmax(0,1fr)}
+  .lanes .gap{display:none}
+  .lanes .lane{margin-top:10px}
+  .rules,.loop{grid-template-columns:minmax(0,1fr)}
+  .loop div:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-14px;transform:translate(50%,50%)}
+  .lang{grid-template-columns:minmax(0,1fr)}
+  .lang .ar{transform:rotate(90deg);height:28px}
+  .lang .hd.h2c,.lang .hd.mid{display:none}
 }
-.nav-logo { display: flex; align-items: center; gap: 10px; }
-.nav-mark { width: 28px; height: 28px; background: var(--teal); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.nav-brand { font-size: 13px; font-weight: 700; color: white; letter-spacing: -0.01em; }
-.nav-brand span { color: var(--teal-light); }
-.nav-links { display: flex; gap: 2px; }
-.nav-btn { padding: 6px 11px; border-radius: 4px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5); cursor: pointer; border: none; background: none; font-family: 'Sora', sans-serif; white-space: nowrap; }
-.nav-btn:hover { color: white; background: rgba(255,255,255,0.07); }
-.nav-btn.active { color: white; background: var(--teal); }
-.nav-btn.cs-btn { border-left: 1px solid rgba(255,255,255,0.1); margin-left: 6px; padding-left: 13px; }
-
-.page-wrap { margin-top: 52px; }
-.screen { display: none; }
-.screen.visible { display: block; }
-
-/* ═══════════════════════════════════════
-   APP SHELL (shared)
-═══════════════════════════════════════ */
-.app { display: flex; height: calc(100vh - 52px); background: var(--surface); }
-.sidebar {
-  width: 224px; flex-shrink: 0; background: var(--ink); display: flex; flex-direction: column;
-  border-right: 1px solid rgba(255,255,255,0.06);
-}
-.sb-top { padding: 16px 0 8px; }
-.sb-lbl { padding: 0 18px 5px; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.28); text-transform: uppercase; letter-spacing: 0.1em; }
-.sb-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 18px; font-size: 12px; color: rgba(255,255,255,0.48);
-  cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s;
-}
-.sb-item:hover { color: rgba(255,255,255,0.82); background: rgba(255,255,255,0.05); }
-.sb-item.active { color: white; background: rgba(10,123,116,0.2); border-left-color: var(--teal-light); }
-.sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.sb-badge { margin-left: auto; background: var(--teal); color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
-.sb-badge.red { background: var(--red); }
-.sb-user { margin-top: auto; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 9px; }
-.sb-av { width: 30px; height: 30px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
-.sb-uname { font-size: 12px; font-weight: 600; color: white; }
-.sb-urole { font-size: 10px; color: rgba(255,255,255,0.35); }
-
-.main { flex: 1; overflow-y: auto; padding: 24px 28px; }
-.pg-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
-.pg-title { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 2px; letter-spacing: -0.02em; }
-.pg-sub { font-size: 12px; color: var(--muted); }
-.hdr-btns { display: flex; gap: 8px; }
-
-/* BUTTONS */
-.btn { display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 14px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: 'Sora', sans-serif; cursor: pointer; border: none; letter-spacing: -0.01em; }
-.btn-primary { background: var(--teal); color: white; }
-.btn-primary:hover { background: var(--teal-light); }
-.btn-secondary { background: white; color: var(--ink); border: 1px solid var(--border2); }
-.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-.btn-danger { background: var(--red-lt); color: var(--red); border: 1px solid rgba(214,69,69,0.2); }
-.btn-sm { height: 28px; padding: 0 10px; font-size: 11px; }
-.btn-pulse { background: var(--pulse); color: white; animation: pulse-glow 2s infinite; }
-@keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 rgba(229,62,62,0.4)} 50%{box-shadow:0 0 0 6px rgba(229,62,62,0)} }
-
-/* BADGES */
-.badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
-.b-teal  { background: var(--teal-lt);  color: var(--teal); }
-.b-green { background: var(--green-lt); color: var(--green); }
-.b-amber { background: var(--amber-lt); color: var(--amber); }
-.b-red   { background: var(--red-lt);   color: var(--red); }
-.b-blue  { background: var(--blue-lt);  color: var(--blue); }
-.b-grey  { background: var(--surface2); color: var(--muted); }
-
-/* CARDS */
-.card { background: white; border-radius: 10px; border: 1px solid var(--border); }
-.card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.card-title { font-size: 13px; font-weight: 700; color: var(--ink); }
-.card-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.card-body { padding: 18px; }
-
-/* ═══════════════════════════════════════
-   SCREEN 1: ACTIVE CONSULTATION
-═══════════════════════════════════════ */
-.consult-layout { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
-.recording-banner {
-  background: linear-gradient(135deg, #0A2E2C 0%, #0F3D3A 100%);
-  border-radius: 10px; padding: 16px 20px; margin-bottom: 18px;
-  display: flex; align-items: center; gap: 16px;
-  border: 1px solid rgba(10,123,116,0.3);
-}
-.rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--pulse); flex-shrink: 0; animation: pulse-glow 1.5s infinite; }
-.rec-info { flex: 1; }
-.rec-label { font-size: 11px; font-weight: 700; color: var(--teal-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
-.rec-detail { font-size: 12px; color: rgba(255,255,255,0.6); }
-.rec-timer { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 500; color: white; margin-left: auto; }
-.rec-stop { background: var(--red); color: white; border: none; border-radius: 6px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Sora', sans-serif; }
-
-/* Transcript */
-.transcript-area { background: white; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
-.transcript-header { padding: 13px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); }
-.transcript-title { font-size: 12px; font-weight: 700; color: var(--ink); }
-.transcript-body { padding: 18px; height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-.tx-turn { display: flex; gap: 12px; }
-.tx-av { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; margin-top: 2px; }
-.tx-av.doc { background: var(--teal); }
-.tx-av.pat { background: var(--ink-soft); }
-.tx-content { flex: 1; }
-.tx-speaker { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-.tx-text { font-size: 13px; color: var(--body-txt); line-height: 1.6; }
-.tx-text span.highlight { background: var(--teal-mid); color: var(--teal-dark); border-radius: 3px; padding: 0 3px; font-weight: 500; }
-.tx-live { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-.tx-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal-light); }
-.tx-live-dot:nth-child(1) { animation: blink 1.2s 0s infinite; }
-.tx-live-dot:nth-child(2) { animation: blink 1.2s 0.2s infinite; }
-.tx-live-dot:nth-child(3) { animation: blink 1.2s 0.4s infinite; }
-@keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-/* Right panel */
-.consult-panel { display: flex; flex-direction: column; gap: 14px; }
-.patient-ctx { background: var(--ink); border-radius: 10px; padding: 16px; }
-.pctx-lbl { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-.pctx-name { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
-.pctx-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.pctx-tag { font-size: 10px; padding: 2px 8px; background: rgba(255,255,255,0.1); border-radius: 3px; color: rgba(255,255,255,0.62); }
-.pctx-alerts { display: flex; flex-direction: column; gap: 5px; }
-.pctx-alert { font-size: 11px; padding: 6px 10px; border-radius: 5px; display: flex; align-items: center; gap: 7px; }
-.pctx-alert.red { background: rgba(214,69,69,0.18); color: #FF9090; }
-.pctx-alert.amber { background: rgba(196,122,26,0.18); color: #FFC36B; }
-
-/* AI suggestions */
-.ai-card { background: var(--teal-lt); border: 1px solid var(--teal-mid); border-radius: 10px; overflow: hidden; }
-.ai-head { padding: 10px 14px; background: var(--teal-dark); display: flex; align-items: center; gap: 8px; }
-.ai-head-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); }
-.ai-head-sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-left: auto; }
-.ai-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-.ai-item { background: white; border-radius: 6px; padding: 9px 11px; border: 1px solid var(--teal-mid); }
-.ai-item-type { font-size: 9px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-.ai-item-text { font-size: 12px; color: var(--ink); line-height: 1.5; }
-.ai-item-source { font-size: 10px; color: var(--muted); margin-top: 4px; font-style: italic; }
-
-/* ═══════════════════════════════════════
-   SCREEN 2: VISIT SUMMARY
-═══════════════════════════════════════ */
-.summary-layout { display: grid; grid-template-columns: 1fr 280px; gap: 18px; }
-.summary-status-bar { background: var(--green-lt); border: 1px solid rgba(26,122,63,0.2); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.ss-icon { color: var(--green); font-size: 18px; }
-.ss-label { font-size: 13px; font-weight: 600; color: var(--green); }
-.ss-sub { font-size: 12px; color: var(--body-txt); margin-top: 1px; }
-.ss-actions { margin-left: auto; display: flex; gap: 8px; }
-
-.section-divider { height: 1px; background: var(--border); margin: 20px 0; }
-.section-head { font-size: 10px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-
-/* Diagnosis block */
-.diagnosis-block { background: var(--surface); border-radius: 8px; padding: 14px; border: 1px solid var(--border); margin-bottom: 12px; }
-.diag-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal); margin-bottom: 4px; }
-.diag-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-.diag-note { font-size: 12px; color: var(--body-txt); line-height: 1.6; }
-
-/* Prescription table */
-.rx-table { width: 100%; border-collapse: collapse; }
-.rx-table thead th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; background: var(--surface); border-bottom: 1px solid var(--border); }
-.rx-table tbody tr { border-bottom: 1px solid var(--border); }
-.rx-table tbody tr:last-child { border-bottom: none; }
-.rx-table td { padding: 10px 12px; font-size: 12px; color: var(--body-txt); vertical-align: middle; }
-.rx-table td.drug-name { font-weight: 600; color: var(--ink); }
-.rx-table td.mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal-dark); }
-
-/* Notes */
-.note-block { font-size: 13px; color: var(--body-txt); line-height: 1.8; padding: 14px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
-.note-block .tag { display: inline-block; background: var(--teal-lt); color: var(--teal-dark); font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-right: 4px; }
-
-/* Summary sidebar */
-.sum-sidebar { display: flex; flex-direction: column; gap: 14px; }
-
-/* ═══════════════════════════════════════
-   SCREEN 3: PATIENT HISTORY
-═══════════════════════════════════════ */
-.history-layout { display: grid; grid-template-columns: 280px 1fr; gap: 18px; }
-.patient-profile-card { background: var(--ink); border-radius: 10px; padding: 20px; color: white; }
-.ppcard-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; margin-bottom: 14px; }
-.ppcard-name { font-size: 16px; font-weight: 700; color: white; margin-bottom: 4px; letter-spacing: -0.02em; }
-.ppcard-id { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.38); margin-bottom: 12px; }
-.ppcard-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.ppcard-meta-row { display: flex; justify-content: space-between; font-size: 11px; }
-.ppcard-meta-key { color: rgba(255,255,255,0.38); }
-.ppcard-meta-val { color: rgba(255,255,255,0.82); font-weight: 500; }
-.ppcard-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 0; }
-.condition-tags { display: flex; flex-direction: column; gap: 5px; }
-.condition-tag { font-size: 11px; padding: 5px 10px; background: rgba(255,255,255,0.08); border-radius: 5px; color: rgba(255,255,255,0.72); display: flex; align-items: center; gap: 7px; }
-.condition-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-
-/* Timeline */
-.visit-timeline { display: flex; flex-direction: column; gap: 0; }
-.visit-item { display: grid; grid-template-columns: 52px 1fr; gap: 16px; cursor: pointer; }
-.visit-left { display: flex; flex-direction: column; align-items: center; }
-.visit-date-box { background: var(--teal-lt); border: 1px solid var(--teal-mid); border-radius: 7px; padding: 6px 8px; text-align: center; width: 44px; flex-shrink: 0; }
-.vd-day { font-size: 14px; font-weight: 700; color: var(--teal-dark); line-height: 1; }
-.vd-month { font-size: 9px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.06em; }
-.visit-line { width: 2px; flex: 1; min-height: 16px; background: var(--border); margin: 3px auto; }
-.visit-item:last-child .visit-line { display: none; }
-.visit-card { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 14px; transition: border-color 0.15s; }
-.visit-card:hover { border-color: var(--teal); }
-.visit-card.active { border-color: var(--teal); box-shadow: 0 2px 12px rgba(10,123,116,0.1); }
-.vc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-.vc-doctor { font-size: 12px; font-weight: 600; color: var(--ink); }
-.vc-facility { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.vc-chief { font-size: 13px; color: var(--body-txt); margin-bottom: 10px; }
-.vc-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.vc-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; border: 1px solid var(--border); color: var(--body-txt); }
-.vc-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 9px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
-
-/* ═══════════════════════════════════════
-   SCREEN 4: PRESCRIPTION DETAIL
-═══════════════════════════════════════ */
-.rx-layout { display: grid; grid-template-columns: 1fr 280px; gap: 18px; }
-.rx-header-block { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-start; }
-.rx-brand { display: flex; align-items: center; gap: 14px; }
-.rx-logo-mark { width: 40px; height: 40px; background: var(--teal-lt); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-.rx-from { }
-.rx-from-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
-.rx-from-name { font-size: 15px; font-weight: 700; color: var(--ink); }
-.rx-from-cred { font-size: 12px; color: var(--muted); }
-.rx-meta-right { text-align: right; }
-.rx-ref { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--teal); margin-bottom: 6px; }
-.rx-date { font-size: 12px; color: var(--muted); }
-.rx-valid { display: inline-flex; align-items: center; gap: 5px; background: var(--green-lt); color: var(--green); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 4px; margin-top: 5px; }
-
-/* Drug card */
-.drug-card { background: white; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
-.drug-card-head { padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
-.drug-name-big { font-size: 15px; font-weight: 700; color: var(--ink); }
-.drug-generic { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.drug-strength { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--teal-dark); background: var(--teal-lt); padding: 3px 9px; border-radius: 4px; }
-.drug-body { padding: 16px 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.drug-field-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.drug-field-val { font-size: 13px; font-weight: 600; color: var(--ink); }
-.drug-instructions { padding: 0 18px 16px; }
-.drug-inst-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-.drug-inst-text { font-size: 12px; color: var(--body-txt); line-height: 1.7; background: var(--surface); border-radius: 6px; padding: 10px 12px; border: 1px solid var(--border); }
-
-/* ═══════════════════════════════════════
-   SCREEN 5: PATIENT APP VIEW
-═══════════════════════════════════════ */
-.patient-app-wrap { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 52px); background: var(--surface); padding: 24px; }
-.phone-shell {
-  width: 375px; background: var(--ink); border-radius: 44px;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
-  padding: 12px; position: relative;
-}
-.phone-notch { height: 36px; background: var(--ink); border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
-.phone-camera { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.1); }
-.phone-screen { background: var(--surface); border-radius: 34px; overflow: hidden; height: 680px; display: flex; flex-direction: column; }
-.phone-status { height: 40px; background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-.phone-time { font-size: 13px; font-weight: 700; color: white; font-family: 'JetBrains Mono', monospace; }
-.phone-icons { display: flex; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.7); }
-.phone-scroll { flex: 1; overflow-y: auto; background: var(--surface); }
-.phone-scroll::-webkit-scrollbar { display: none; }
-
-/* Patient app header */
-.pa-header { background: var(--teal-dark); padding: 20px 18px 24px; color: white; }
-.pa-greeting { font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
-.pa-name { font-size: 18px; font-weight: 700; color: white; margin-bottom: 12px; letter-spacing: -0.02em; }
-.pa-stats { display: flex; gap: 12px; }
-.pa-stat { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 12px; flex: 1; }
-.pa-stat-val { font-size: 16px; font-weight: 700; color: white; }
-.pa-stat-lbl { font-size: 9px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
-
-/* Patient app body */
-.pa-body { padding: 16px; }
-.pa-section-title { font-size: 11px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.pa-recent-visit { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 14px; margin-bottom: 12px; }
-.pa-rv-date { font-size: 10px; color: var(--muted); margin-bottom: 5px; }
-.pa-rv-doc { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-.pa-rv-reason { font-size: 12px; color: var(--body-txt); margin-bottom: 10px; }
-.pa-rv-tags { display: flex; gap: 5px; flex-wrap: wrap; }
-.pa-rv-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--teal-lt); color: var(--teal-dark); font-weight: 500; }
-.pa-meds { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.pa-med { background: white; border-radius: 8px; border: 1px solid var(--border); padding: 11px 13px; display: flex; align-items: center; gap: 11px; }
-.pa-med-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--teal-lt); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.pa-med-name { font-size: 12px; font-weight: 600; color: var(--ink); }
-.pa-med-dose { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.pa-med-time { margin-left: auto; font-size: 10px; background: var(--teal-lt); color: var(--teal-dark); padding: 3px 7px; border-radius: 4px; font-weight: 600; }
-.pa-reminder { background: var(--amber-lt); border-radius: 10px; padding: 13px; border: 1px solid rgba(196,122,26,0.2); display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
-.pa-reminder-icon { font-size: 18px; flex-shrink: 0; }
-.pa-reminder-title { font-size: 12px; font-weight: 600; color: var(--amber); margin-bottom: 2px; }
-.pa-reminder-text { font-size: 11px; color: var(--body-txt); line-height: 1.5; }
-.pa-bottom-nav { background: white; border-top: 1px solid var(--border); padding: 8px 0; display: flex; }
-.pa-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; cursor: pointer; }
-.pa-nav-icon { font-size: 16px; }
-.pa-nav-label { font-size: 9px; color: var(--muted); font-weight: 500; }
-.pa-nav-item.active .pa-nav-label { color: var(--teal); }
-.pa-nav-item.active .pa-nav-icon { filter: none; }
-
-/* ═══════════════════════════════════════
-   CASE STUDY
-═══════════════════════════════════════ */
-.cs-page {
-  max-width: 800px; margin: 0 auto; padding: 56px 36px 80px;
-  background: white; min-height: calc(100vh - 52px);
-  font-family: 'Sora', sans-serif;
-}
-.cs-cover { margin-bottom: 56px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
-.cs-eyebrow { font-size: 11px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-.cs-eyebrow::before { content:''; width: 20px; height: 2px; background: var(--teal); }
-.cs-h1 { font-size: 42px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1.08; margin-bottom: 20px; }
-.cs-h1 em { font-family: 'Lora', serif; font-style: italic; font-weight: 400; color: var(--teal); }
-.cs-meta { display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid var(--border); padding-top: 20px; }
-.cs-mc { padding-right: 28px; margin-right: 28px; border-right: 1px solid var(--border); }
-.cs-mc:last-child { border-right: none; padding-right: 0; margin-right: 0; }
-.cs-ml { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-.cs-mv { font-size: 13px; color: var(--ink); font-weight: 500; }
-.cs-block { margin-bottom: 52px; }
-.cs-sl { font-size: 10px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-.cs-h2 { font-size: 26px; font-weight: 700; color: var(--ink); margin-bottom: 18px; letter-spacing: -0.025em; line-height: 1.2; }
-.cs-h2 em { font-family: 'Lora', serif; font-style: italic; font-weight: 400; color: var(--teal); }
-.cs-p { font-size: 15px; line-height: 1.82; color: #444; margin-bottom: 15px; }
-.cs-p strong { color: var(--ink); font-weight: 600; }
-.cs-p:last-child { margin-bottom: 0; }
-.cs-div { height: 1px; background: var(--border); margin: 52px 0; }
-.cs-quote { border-left: 3px solid var(--teal); padding: 4px 0 4px 22px; margin: 28px 0; }
-.cs-quote p { font-size: 18px; font-family: 'Lora', serif; font-style: italic; color: var(--ink); line-height: 1.55; }
-.cs-callout { background: var(--teal-lt); border: 1px solid var(--teal-mid); border-radius: 8px; padding: 16px 20px; margin: 24px 0; }
-.cs-callout-lbl { font-size: 9px; font-weight: 700; color: var(--teal-dark); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-.cs-callout p { font-size: 13px; color: var(--body-txt); line-height: 1.7; }
-.cs-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin: 24px 0; }
-.cs-insight { padding: 18px; border: 1px solid var(--border); border-radius: 8px; }
-.cs-insight h4 { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.4; }
-.cs-insight p { font-size: 12px; color: #666; line-height: 1.65; }
-
-/* Screen embed */
-.scr { margin: 32px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-.scr-bar { background: var(--ink); padding: 9px 14px; display: flex; align-items: center; gap: 8px; }
-.scr-dots { display: flex; gap: 5px; }
-.scr-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
-.scr-ttl { font-size: 11px; color: rgba(255,255,255,0.38); margin-left: 6px; }
-.scr-pv { background: var(--surface2); overflow: hidden; }
-.scr-inner { pointer-events: none; transform-origin: top left; font-family: 'Sora', sans-serif; }
-.scr-cap { background: var(--surface); border-top: 1px solid var(--border); padding: 9px 14px; display: flex; justify-content: space-between; align-items: center; }
-.scr-cap span { font-size: 11px; color: var(--muted); }
-.scr-cap strong { color: var(--body-txt); }
-.scr-cap button { font-size: 11px; color: var(--teal); border: 1px solid rgba(10,123,116,0.25); background: white; border-radius: 3px; padding: 3px 9px; cursor: pointer; font-family: 'Sora',sans-serif; }
-</style>
-<style id="atmos-mobile-fixes">
-/* A stray tag closes .cs-page early in the rendered DOM, so the writeup blocks
-   fall out into .page-wrap and run full-width. Constrain the BLOCKS themselves
-   (works wherever they land), and pad them only when they're loose in page-wrap. */
-.cs-page, .cs-cover, .cs-block, .cs-div, .scr-pv, .scr-cap {
-  max-width: 820px; margin-left: auto; margin-right: auto;
-}
-.page-wrap > .cs-cover, .page-wrap > .cs-block, .page-wrap > .cs-div,
-.page-wrap > .scr-pv, .page-wrap > .scr-cap {
-  padding-left: 28px; padding-right: 28px; box-sizing: border-box;
-}
-
-/* "Open the live screen" buttons in the Solution section. */
-.cs-screens-links { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
-.cs-screens-links button {
-  font-family: 'Sora', sans-serif; font-size: 12.5px; font-weight: 600;
-  color: #065954; background: #E6F4F3; border: 1px solid rgba(10,123,116,0.28);
-  border-radius: 7px; padding: 10px 15px; cursor: pointer; transition: background .2s, border-color .2s;
-}
-.cs-screens-links button:hover { background: #d3ecea; border-color: rgba(10,123,116,0.5); }
-
-/* ATMOS responsive add-on: keep the in-page top nav usable on phones.
-   The logo stays put; the link row becomes a constrained, swipeable strip. */
-@media (max-width: 640px) {
-  html, body { overflow-x: hidden; }   /* no sideways page scroll; clip mockup excess */
-  .top-nav { padding: 0 12px; }
-  .nav-brand { display: none; }   /* keep the logo mark; free the row for the links */
-  .nav-links { flex: 1 1 0; min-width: 0; margin-left: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-btn { flex-shrink: 0; }
-  .cs-page { padding: 40px 20px 64px; }
-  .cs-insights { grid-template-columns: 1fr !important; }   /* case-study content → one column */
-  img, svg, video, iframe { max-width: 100%; height: auto; }
-  /* App-demo screens are desktop layouts — keep their proportions but make each
-     one swipeable instead of squished/clipped (the writeup screen stays prose). */
-  #sc-consult, #sc-summary, #sc-history, #sc-prescription, #sc-patient {
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-  }
-  #sc-consult .app, #sc-summary .app, #sc-history .app,
-  #sc-prescription .app, #sc-patient .app { min-width: 880px; }
-}
-</style>
-<style id="cv-style">
-.cv{margin:0 auto 48px;max-width:760px;box-sizing:border-box}
-.cv video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6)}
-.cv-cap{display:flex;justify-content:space-between;gap:12px;margin:10px 2px 0;font:500 12px/1.4 'Martian Mono',ui-monospace,Menlo,monospace;letter-spacing:.02em;opacity:.7}
-.cs-back{display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border-radius:50%;border:1px solid currentColor;color:inherit;text-decoration:none;opacity:.75;transition:opacity .2s,background-color .2s;margin-right:10px}
-.cs-back:hover{opacity:1;background:rgba(127,127,127,.15)}
-.cs-back svg{width:16px;height:16px}
-.top-nav .cs-back{color:#EDEDEA}
-@media (max-width:640px){.cv{margin-bottom:32px}}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to the case study</a>
 
-<nav class="top-nav">
-  <div class="nav-logo"><a class="cs-back" href="../index.html" aria-label="Back to all work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    <div class="nav-mark">🩺</div>
-    <div class="nav-brand">MediScribe <span>·</span> Capgemini Internal</div>
-  </div>
-  <div class="nav-links">
-    <button class="nav-btn active" onclick="go('consult')">Live Consultation</button>
-    <button class="nav-btn" onclick="go('summary')">Visit Summary</button>
-    <button class="nav-btn" onclick="go('history')">Patient History</button>
-    <button class="nav-btn" onclick="go('prescription')">Prescription</button>
-    <button class="nav-btn" onclick="go('patient')">Patient View</button>
-    <button class="nav-btn cs-btn" onclick="go('casestudy')">📋 Case Study</button>
-  </div>
-</nav>
-
-<div class="page-wrap">
-
-<!-- ══════ SCREEN 1: ACTIVE CONSULTATION ══════ -->
-<div id="sc-consult" class="screen visible">
-  <div class="app">
-    <div class="sidebar">
-      <div class="sb-top">
-        <div class="sb-lbl">Today</div>
-        <div class="sb-item active"><span class="sb-dot" style="background:var(--pulse);animation:pulse-glow 1.5s infinite"></span>Live Consultation</div>
-        <div class="sb-item" onclick="go('summary')">📄 Visit Summary</div>
-        <div class="sb-lbl" style="margin-top:14px">Patients</div>
-        <div class="sb-item" onclick="go('history')">🧑‍⚕️ Patient History</div>
-        <div class="sb-item" onclick="go('prescription')">💊 Prescriptions</div>
-        <div class="sb-lbl" style="margin-top:14px">Tools</div>
-        <div class="sb-item">📅 Appointments <span class="sb-badge">4</span></div>
-        <div class="sb-item">🔔 Alerts <span class="sb-badge red">2</span></div>
-        <div class="sb-item">⚙ Settings</div>
-      </div>
-      <div class="sb-user">
-        <div class="sb-av">DS</div>
-        <div><div class="sb-uname">Dr. S. Krishnan</div><div class="sb-urole">General Practitioner</div></div>
-      </div>
-    </div>
-    <div class="main">
-      <!-- Recording banner -->
-      <div class="recording-banner">
-        <div class="rec-dot"></div>
-        <div class="rec-info">
-          <div class="rec-label">Recording in progress</div>
-          <div class="rec-detail">Patient: Aisha Mehta · DOB: 14 Mar 1988 · Visit #7</div>
-        </div>
-        <div class="rec-timer">08:43</div>
-        <button class="rec-stop" onclick="go('summary')">■ End & Summarise</button>
-      </div>
-
-      <div class="consult-layout">
-        <!-- Transcript -->
-        <div>
-          <div class="transcript-area">
-            <div class="transcript-header">
-              <div class="transcript-title">Live Transcript</div>
-              <div style="display:flex;gap:8px">
-                <span class="badge b-teal">🎙 Listening</span>
-                <button class="btn btn-ghost btn-sm">⏸ Pause</button>
-              </div>
-            </div>
-            <div class="transcript-body">
-              <div class="tx-turn">
-                <div class="tx-av doc">DR</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Dr. Krishnan · 08:01</div>
-                  <div class="tx-text">Good morning Aisha, how have you been feeling since your last visit? Any changes with the <span class="highlight">blood pressure</span>?</div>
-                </div>
-              </div>
-              <div class="tx-turn">
-                <div class="tx-av pat">AM</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Patient · 08:02</div>
-                  <div class="tx-text">Better, actually. I've been taking the <span class="highlight">Amlodipine</span> as prescribed. But I've been getting these headaches in the morning, maybe the past two weeks.</div>
-                </div>
-              </div>
-              <div class="tx-turn">
-                <div class="tx-av doc">DR</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Dr. Krishnan · 08:04</div>
-                  <div class="tx-text">Okay, morning headaches can sometimes be associated with <span class="highlight">blood pressure fluctuations</span> overnight. Let me check your reading today. Any nausea or visual disturbances with those headaches?</div>
-                </div>
-              </div>
-              <div class="tx-turn">
-                <div class="tx-av pat">AM</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Patient · 08:05</div>
-                  <div class="tx-text">No visual issues, but sometimes a bit of nausea. Also wanted to mention — I've been feeling quite <span class="highlight">fatigued</span>, especially in the afternoons. I'm not sure if that's related.</div>
-                </div>
-              </div>
-              <div class="tx-turn">
-                <div class="tx-av doc">DR</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Dr. Krishnan · 08:07</div>
-                  <div class="tx-text">The fatigue could be related to the <span class="highlight">Amlodipine</span> — it's a known side effect in some patients. I'd also want to rule out <span class="highlight">thyroid</span> issues given your family history. Let's order a <span class="highlight">TSH panel</span> today.</div>
-                </div>
-              </div>
-              <div class="tx-turn">
-                <div class="tx-av pat">AM</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Patient · 08:08</div>
-                  <div class="tx-text">That makes sense. My mother had thyroid problems. Is it something we should be worried about right now?</div>
-                </div>
-              </div>
-              <div class="tx-turn" style="opacity:0.5">
-                <div class="tx-av doc">DR</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Dr. Krishnan · 08:09</div>
-                  <div class="tx-text">Not urgently — we're just being thorough. I'm also going to check your readings today and we may adjust the <span class="highlight">Amlodipine dosage</span> depending on what we find...</div>
-                </div>
-              </div>
-              <!-- Live typing indicator -->
-              <div class="tx-turn">
-                <div class="tx-av pat">AM</div>
-                <div class="tx-content">
-                  <div class="tx-speaker">Patient · Now</div>
-                  <div class="tx-live">
-                    <div class="tx-live-dot"></div>
-                    <div class="tx-live-dot"></div>
-                    <div class="tx-live-dot"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick notes -->
-          <div style="margin-top:14px">
-            <div class="card">
-              <div class="card-head">
-                <div class="card-title">Doctor's Quick Notes</div>
-                <span class="badge b-grey">Auto-saved</span>
-              </div>
-              <div class="card-body" style="padding:12px 16px">
-                <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--body-txt);line-height:1.7;min-height:60px">
-                  BP reading today: 138/88. Morning headaches x2 weeks, no visual sx. Fatigue — possible Amlodipine side effect. Family Hx thyroid (maternal). Plan: TSH panel, consider dose adjustment.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right panel -->
-        <div class="consult-panel">
-          <!-- Patient context -->
-          <div class="patient-ctx">
-            <div class="pctx-lbl">Patient Context</div>
-            <div class="pctx-name">Aisha Mehta</div>
-            <div class="pctx-meta">
-              <span class="pctx-tag">36F</span>
-              <span class="pctx-tag">DOB: 14 Mar 1988</span>
-              <span class="pctx-tag">MRN: 00-4471-MH</span>
-            </div>
-            <div class="pctx-alerts">
-              <div class="pctx-alert red">⚠ Penicillin allergy (severe)</div>
-              <div class="pctx-alert amber">⚡ Hypertension — on Amlodipine 5mg</div>
-              <div class="pctx-alert amber">🧬 Family Hx: Thyroid disorder (maternal)</div>
-            </div>
-          </div>
-
-          <!-- AI suggestions -->
-          <div class="ai-card">
-            <div class="ai-head">
-              <span style="font-size:14px">✦</span>
-              <div class="ai-head-label">AI Suggestions</div>
-              <div class="ai-head-sub">Based on conversation</div>
-            </div>
-            <div class="ai-body">
-              <div class="ai-item">
-                <div class="ai-item-type">🧪 Suggested Test</div>
-                <div class="ai-item-text">TSH + Free T4 panel — indicated by fatigue, family Hx thyroid, morning headaches</div>
-                <div class="ai-item-source">Consistent with NICE CG138</div>
-              </div>
-              <div class="ai-item">
-                <div class="ai-item-type">💊 Drug Note</div>
-                <div class="ai-item-text">Amlodipine-related fatigue reported in 3.4% of patients — consider dose review or switch to Ramipril</div>
-                <div class="ai-item-source">BNF side-effect profile</div>
-              </div>
-              <div class="ai-item">
-                <div class="ai-item-type">📊 Last Visit</div>
-                <div class="ai-item-text">BP was 144/92 on 03 Sep — today's 138/88 shows improvement</div>
-                <div class="ai-item-source">Previous record, 12 weeks ago</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Previous meds -->
-          <div class="card">
-            <div class="card-head">
-              <div class="card-title">Active Medications</div>
-            </div>
-            <div style="padding:12px 14px;display:flex;flex-direction:column;gap:7px">
-              <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">
-                <div><div style="font-weight:600;color:var(--ink)">Amlodipine 5mg</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Once daily — morning</div></div>
-                <span class="badge b-green">Active</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">
-                <div><div style="font-weight:600;color:var(--ink)">Vitamin D3 1000IU</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Once daily — with food</div></div>
-                <span class="badge b-green">Active</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="site">
+  <div class="wrap">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="../index.html"><span class="back" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ankush Meena</a>
+      <ul>
+        <li><a href="../index.html#work" aria-current="page">Work</a></li>
+        <li><a href="../index.html#off">Off the clock</a></li>
+        <li><a href="resume.html">Résumé</a></li>
+        <li><a class="strong" href="mailto:ankushmeena0779@gmail.com">Email me</a></li>
+      </ul>
+    </nav>
   </div>
 </div>
 
-<!-- ══════ SCREEN 2: VISIT SUMMARY ══════ -->
-<div id="sc-summary" class="screen">
-  <div class="app">
-    <div class="sidebar">
-      <div class="sb-top">
-        <div class="sb-lbl">Today</div>
-        <div class="sb-item" onclick="go('consult')">🎙 Live Consultation</div>
-        <div class="sb-item active">📄 Visit Summary</div>
-        <div class="sb-lbl" style="margin-top:14px">Patients</div>
-        <div class="sb-item" onclick="go('history')">🧑‍⚕️ Patient History</div>
-        <div class="sb-item" onclick="go('prescription')">💊 Prescriptions</div>
-        <div class="sb-item">📅 Appointments <span class="sb-badge">4</span></div>
-        <div class="sb-item">🔔 Alerts <span class="sb-badge red">2</span></div>
-      </div>
-      <div class="sb-user"><div class="sb-av">DS</div><div><div class="sb-uname">Dr. S. Krishnan</div><div class="sb-urole">General Practitioner</div></div></div>
+<main id="main">
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">A1 · Healthcare UX · Capgemini internal</p>
+    <h1 class="h1">A tool that listens, <em>so doctors don't have to type.</em></h1>
+    <p class="lede">An AI consultation scribe for Capgemini's internal health clinic. It records the visit once, then hands it back two ways: a clinical record the doctor signs, and a plain-language app for the patient.</p>
+    <dl class="facts">
+      <div><dt>My role</dt><dd>UX designer</dd></div>
+      <div><dt>Client</dt><dd>Capgemini (internal)</dd></div>
+      <div><dt>Sector</dt><dd>Healthcare tech</dd></div>
+      <div><dt>Users</dt><dd>Doctors and patients</dd></div>
+      <div><dt>Output</dt><dd>Hi-fi prototypes and handoff</dd></div>
+    </dl>
+    <section class="cv" aria-label="MediScribe walkthrough video">
+      <video controls playsinline preload="metadata" poster="../thumbnails/mediscribe-cover.jpg"><source src="../videos/mediscribe.mp4" type="video/mp4"></video>
+      <p class="cv-cap"><span>Walkthrough</span><span>1:44</span></p>
+    </section>
+  </div>
+</header>
+
+<section class="sec" aria-labelledby="short-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">The short version</p>
+      <h2 class="h2" id="short-h">Record the visit once. <em>Hand it back two ways.</em></h2>
     </div>
-    <div class="main">
-      <div class="pg-hdr">
-        <div><div class="pg-title">Visit Summary</div><div class="pg-sub">Aisha Mehta · Generated from session transcript · 24 Nov 2024</div></div>
-        <div class="hdr-btns">
-          <button class="btn btn-secondary btn-sm">✏ Edit</button>
-          <button class="btn btn-secondary btn-sm">📤 Share with Patient</button>
-          <button class="btn btn-primary btn-sm">✓ Finalise Record</button>
+    <div class="tri rv">
+      <div><p class="label">The problem</p><p>In a ten-minute consultation, the doctor spent half of it typing instead of listening. The patient left remembering maybe half of what was said.</p></div>
+      <div><p class="label">What I designed</p><p>A consultation screen that only listens, a summary the doctor reviews and signs, and a plain-language app for the patient. Five screens, one source of truth.</p></div>
+      <div><p class="label">What I learned</p><p>In healthcare, a tool earns trust before it gets to help. One wrong line in a summary, and a doctor stops believing all of it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" aria-labelledby="brief-h">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">The brief</p>
+      <h2 class="h2" id="brief-h">In a ten-minute consultation, <em>five minutes went to the keyboard.</em></h2>
+      <p class="lede">Capgemini ran an internal health clinic, and the brief came out of one observation.</p>
+    </div>
+    <figure class="tenmin rv" style="margin-left:0;margin-right:0" aria-label="A ten-minute consultation: about five minutes listening, about five minutes typing">
+      <div class="bar"><div class="listen"><b>Listening</b><span>About 5 minutes</span></div><div class="type"><b>Typing</b><span>About 5 minutes</span></div></div>
+      <div class="axis" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10 min</span></div>
+    </figure>
+    <div class="brief rv">
+      <span class="label">The brief</span>
+      <p>Give doctors back the half of the appointment they lose to a keyboard, <em>for the doctor and for the patient on the other side of the desk.</em></p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="disc-h">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Discovery</p>
+      <h2 class="h2" id="disc-h">I spent a morning watching real consultations <em>before I drew anything.</em></h2>
+    </div>
+    <div class="lanes rv" aria-label="The pattern, every visit">
+      <span class="lane">Eyes on the patient</span>
+      <div class="st"><i>1</i>Asks a question</div>
+      <div class="st"><i>2</i>The patient answers</div>
+      <div class="gap"></div><div class="gap"></div><div class="gap"></div><div class="gap"></div>
+      <span class="lane">Eyes on the screen</span>
+      <div class="gap"></div><div class="gap"></div>
+      <div class="st scr"><i>3</i>Types instead of thinking</div>
+      <div class="st scr"><i>4</i>Hunts for a past prescription</div>
+      <div class="st scr"><i>5</i>Checks a drug interaction</div>
+      <div class="st scr"><i>6</i>Tries to recall what was said two minutes ago</div>
+    </div>
+    <p class="lanes-cap rv">By the end, a chunk of the appointment had gone to paperwork, and the patient walked out <em>remembering maybe half of what happened.</em></p>
+  </div>
+</section>
+
+<section class="sec alt" aria-labelledby="who-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">Who it was for</p>
+      <h2 class="h2" id="who-h">Same data, <em>three very different people.</em></h2>
+      <p class="lede">That gave me three problems to design for, not one.</p>
+    </div>
+    <div class="cards3 rv">
+      <article class="pcard">
+        <div class="pc-top"><h3 class="h3" style="margin-top:0">The doctor</h3><p>Put a screen in front of them mid-consultation and they'll look at it. They can't help it.</p></div>
+        <div class="pc-fix"><span class="label">What they needed</span><b>A screen that earns its place in the room without pulling their eyes off the patient.</b></div>
+      </article>
+      <article class="pcard">
+        <div class="pc-top"><h3 class="h3" style="margin-top:0">The patient</h3><p>They leave having absorbed half of what was said, lose the paper script and forget the dose.</p></div>
+        <div class="pc-fix"><span class="label">What they needed</span><b>The visit handed back in plain language, with medication reminders that set themselves.</b></div>
+      </article>
+      <article class="pcard">
+        <div class="pc-top"><h3 class="h3" style="margin-top:0">The next specialist</h3><p>They meet the patient cold and rebuild the history from memory, usually getting bits of it wrong.</p></div>
+        <div class="pc-fix"><span class="label">What they needed</span><b>The whole record in front of them, without a phone call to the GP's office.</b></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="sec dark" aria-labelledby="rules-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">Principles</p>
+      <h2 class="h2" id="rules-h">Three rules <em>I designed against.</em></h2>
+    </div>
+    <div class="rules rv">
+      <div><span class="n">1</span><h3 class="h3">The consultation screen has to stay invisible.</h3><p>The consultation is between the doctor and the patient. The app is there to record it, not to join in.</p></div>
+      <div><span class="n">2</span><h3 class="h3">The patient app can't read like a medical record.</h3><p>The patient gets the visit back in plain language, written with the clinical team.</p></div>
+      <div><span class="n">3</span><h3 class="h3">Trust is the feature.</h3><p>A doctor won't sign their name to something they don't believe.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="proto" aria-labelledby="sys-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">The system</p>
+      <h2 class="h2" id="sys-h">Five screens, <em>one source of truth.</em></h2>
+      <p class="lede">The same record powers everything. It's captured passively in the room, reviewed by the doctor, then shown two ways: the clinical version for anyone treating the patient, and a plain-language version for the patient. This is the working prototype: click through it, or hover a note to find it on the screen.</p>
+    </div>
+    <ul class="flow rv" role="tablist" aria-label="Prototype screens"></ul>
+    <div class="proto rv" id="proto-panel" role="tabpanel">
+      <div>
+        <div class="frame">
+          <div class="frame-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">MediScribe</span><a href="mediscribe-app.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+          <div class="viewport"><div class="loading">Loading the prototype…</div></div>
         </div>
+        <p class="proto-hint">Best on a laptop or larger. On a phone, open it full screen.</p>
       </div>
+      <div class="notes" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
 
-      <!-- Success bar -->
-      <div class="summary-status-bar">
-        <div class="ss-icon">✓</div>
-        <div>
-          <div class="ss-label">Summary auto-generated from transcript</div>
-          <div class="ss-sub">Session: 08:43 · 12 Nov 2024 · Dr. S. Krishnan · Capgemini Health Clinic, Mumbai</div>
-        </div>
-      </div>
-
-      <div class="summary-layout">
-        <div>
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <div class="card-title">Clinical Summary</div>
-                <div class="card-sub">Auto-generated · review before finalising</div>
-              </div>
-              <span class="badge b-amber">Pending Review</span>
-            </div>
-            <div class="card-body">
-              <!-- Chief complaint -->
-              <div class="section-head">Chief Complaint</div>
-              <div style="font-size:14px;color:var(--body-txt);margin-bottom:20px;line-height:1.7;padding:12px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-                Morning headaches for approximately 2 weeks, associated nausea. Fatigue, particularly in the afternoon. Review of hypertension management.
-              </div>
-
-              <!-- Observations -->
-              <div class="section-head">
-                Observations
-                <div style="display:flex;gap:8px">
-                  <span style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">Today vs last visit</span>
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-                <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border)">
-                  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Blood Pressure</div>
-                  <div style="font-size:20px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace">138/88</div>
-                  <div style="font-size:11px;color:var(--green);margin-top:3px">↓ 6 pts from last visit (144/92)</div>
-                </div>
-                <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border)">
-                  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Heart Rate</div>
-                  <div style="font-size:20px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace">74 bpm</div>
-                  <div style="font-size:11px;color:var(--muted);margin-top:3px">Within normal range</div>
-                </div>
-                <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border)">
-                  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Weight</div>
-                  <div style="font-size:20px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace">64.2 kg</div>
-                  <div style="font-size:11px;color:var(--muted);margin-top:3px">±0.3 kg from last visit</div>
-                </div>
-              </div>
-
-              <!-- Diagnosis -->
-              <div class="section-head">Assessment / Diagnosis</div>
-              <div class="diagnosis-block">
-                <div class="diag-code">ICD-10: I10</div>
-                <div class="diag-name">Essential (primary) hypertension — controlled, improving</div>
-                <div class="diag-note">BP improving on current regimen. Morning headaches likely related to overnight BP variation. Consider 24-hour ambulatory BP monitoring if headaches persist.</div>
-              </div>
-              <div class="diagnosis-block">
-                <div class="diag-code">ICD-10: R53.83</div>
-                <div class="diag-name">Fatigue — under investigation</div>
-                <div class="diag-note">Possible Amlodipine side effect or early thyroid dysfunction given family history. TSH/Free T4 ordered to investigate.</div>
-              </div>
-
-              <!-- Prescriptions -->
-              <div class="section-head" style="margin-top:20px">
-                Prescriptions
-                <button class="btn btn-primary btn-sm" onclick="go('prescription')">View Full ↗</button>
-              </div>
-              <div style="background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px">
-                <table class="rx-table">
-                  <thead><tr><th>Medication</th><th>Dose</th><th>Frequency</th><th>Duration</th><th>Status</th></tr></thead>
-                  <tbody>
-                    <tr>
-                      <td class="drug-name">Amlodipine</td>
-                      <td class="mono">5mg → 10mg</td>
-                      <td>Once daily, morning</td>
-                      <td>30 days</td>
-                      <td><span class="badge b-amber">Dose ↑</span></td>
-                    </tr>
-                    <tr>
-                      <td class="drug-name">Vitamin D3</td>
-                      <td class="mono">1000 IU</td>
-                      <td>Once daily, with food</td>
-                      <td>Continue</td>
-                      <td><span class="badge b-green">Continued</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Tests ordered -->
-              <div class="section-head">Tests Ordered</div>
-              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--blue-lt);border-radius:7px;border:1px solid rgba(31,95,166,0.15)">
-                  <div><div style="font-size:12px;font-weight:600;color:var(--ink)">TSH + Free T4 Panel</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Thyroid function screening — fatigue + family Hx</div></div>
-                  <span class="badge b-blue">Ordered</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:7px;border:1px solid var(--border)">
-                  <div><div style="font-size:12px;font-weight:600;color:var(--ink)">FBC (Full Blood Count)</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Routine — anaemia screen for fatigue</div></div>
-                  <span class="badge b-blue">Ordered</span>
-                </div>
-              </div>
-
-              <!-- Doctor's notes -->
-              <div class="section-head">Doctor's Notes</div>
-              <div class="note-block">
-                <span class="tag">Follow-up</span>Return in 4 weeks or sooner if headaches worsen. Review TSH/FBC results at next appointment.<br><br>
-                <span class="tag">Patient Counselled</span>Discussed medication compliance, salt reduction diet, and importance of morning BP check at home. Patient engaged and aware of thyroid screen purpose.<br><br>
-                <span class="tag">Safety net</span>Patient instructed to attend A&amp;E if BP headache accompanied by visual changes, numbness, or sudden severe onset.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="sum-sidebar">
-          <div class="card">
-            <div class="card-head"><div class="card-title">Session Info</div></div>
-            <div style="padding:14px">
-              <div style="display:flex;flex-direction:column;gap:8px">
-                <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Duration</span><span style="font-weight:600;color:var(--ink)">8 min 43 sec</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Words captured</span><span style="font-weight:600;color:var(--ink)">412 words</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Speaker turns</span><span style="font-weight:600;color:var(--ink)">14 turns</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Confidence</span><span style="font-weight:600;color:var(--green)">94.2%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="card-title">Patient Access</div></div>
-            <div style="padding:14px">
-              <div style="font-size:12px;color:var(--body-txt);line-height:1.65;margin-bottom:12px">Once finalised, this summary will be accessible to Aisha in the patient app and to any treating clinician she authorises.</div>
-              <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--green-lt);border-radius:7px;border:1px solid rgba(26,122,63,0.15)">
-                <span style="font-size:16px">📱</span>
-                <div style="font-size:11px;color:var(--green);font-weight:600">Patient notified on app</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="card-title">Next Visit</div></div>
-            <div style="padding:14px">
-              <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px">12 December 2024</div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:10px">4 weeks · TSH/FBC results review</div>
-              <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center">Confirm Appointment</button>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="card-title">Referring Doctors</div></div>
-            <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
-              <div style="font-size:12px;color:var(--body-txt)">Other authorised clinicians who can view this patient's record:</div>
-              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px">
-                <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">RG</div>
-                <div><div style="font-size:11px;font-weight:600;color:var(--ink)">Dr. R. Gupta</div><div style="font-size:10px;color:var(--muted)">Cardiologist, Apollo</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
+<section class="sec alt" aria-labelledby="cut-h">
+  <div class="wrap split center">
+    <div class="rv">
+      <p class="eyebrow">In the room</p>
+      <h2 class="h2" id="cut-h">Most of the work was deciding <em>what to take out.</em></h2>
+      <div class="sub"><span class="label">The first version</span><p>Put the transcript front and centre, with buttons on the AI suggestions and playback controls. Comprehensive, and exactly the kind of thing a doctor minimises and never reopens.</p></div>
+      <div class="sub"><span class="label">So we cut</span>
+        <ul class="cut"><li>The flag-a-line control</li><li>The accept-suggestion button</li><li>Playback controls</li><li>Anything else that asked for a tap</li></ul>
+        <p style="margin-top:16px;font-family:var(--c-em-font);font-style:italic;color:var(--c-acc);font-size:18px">Every removal made it better.</p>
       </div>
     </div>
+    <div class="rulebox rv">
+      <span class="label">The rule we landed on</span>
+      <p>If the doctor has to touch this screen mid-consultation, something has gone wrong.</p>
+      <small>Principle 1 · The screen stays invisible</small>
+    </div>
+  </div>
+</section>
+
+<section class="sec dark" aria-labelledby="trust-h">
+  <div class="wrap">
+    <div class="split center">
+      <div class="rv">
+        <p class="eyebrow">The record</p>
+        <h2 class="h2" id="trust-h">One wrong line, and a doctor stops <em>believing the whole summary.</em></h2>
+        <p style="margin-top:20px;max-width:52ch">Trust took the longest. Doctors reviewing the auto-generated summary would catch a single wrong line and stop believing the whole thing.</p>
+        <div class="sub"><span class="label" style="color:var(--c-acc-d)">What came out of it</span>
+          <ul class="came"><li>Confidence scoring</li><li>Obvious edit affordances</li><li>Section-by-section review</li></ul>
+        </div>
+      </div>
+      <div class="rv">
+        <div class="draft" aria-hidden="true">
+          <div class="draft-h">Clinical summary <span>Auto-generated</span></div>
+          <div class="ln" style="width:92%"></div><div class="ln" style="width:78%"></div>
+          <div class="ln bad" style="width:86%"></div>
+          <div class="ln dim" style="width:70%"></div><div class="ln dim" style="width:88%"></div><div class="ln dim" style="width:64%"></div><div class="ln dim" style="width:80%"></div><div class="ln dim" style="width:58%"></div>
+        </div>
+        <p class="draft-cap">…and the other seven stop counting.</p>
+      </div>
+    </div>
+    <div class="six rv">
+      <span class="label">Six sections, one sign-off</span>
+      <span class="s"><b>01</b>Chief complaint</span><span class="s"><b>02</b>Observations</span><span class="s"><b>03</b>Assessment</span><span class="s"><b>04</b>Prescriptions</span><span class="s"><b>05</b>Tests ordered</span><span class="s"><b>06</b>Doctor's notes</span>
+    </div>
+    <p class="rv" style="margin-top:22px;max-width:64ch">Confidence scoring, obvious edit affordances and section-by-section review drew the line between "the app did the work for you" and "you're still in control of the record."</p>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="lang-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">For the patient</p>
+      <h2 class="h2" id="lang-h">Same visit, <em>two languages.</em></h2>
+    </div>
+    <div class="lang rv">
+      <div class="hd">The clinical record</div><div class="hd mid"></div><div class="hd h2c">What Aisha reads</div>
+      <div class="clin"><code>ICD-10: I10</code><b>Essential (primary) hypertension, controlled, improving</b><span>BP 138/88, down 6 points from 144/92</span></div>
+      <div class="ar" aria-hidden="true">→</div>
+      <div class="plain"><b>Good news: blood pressure improving</b><span>Your BP today was 138/88, down from 144/92 at your last visit three months ago.</span></div>
+      <div class="clin"><code>Amlodipine · 5mg → 10mg</code><b>Dose up, once daily, morning, 30 days</b><span>Calcium channel blocker (CCB)</span></div>
+      <div class="ar" aria-hidden="true">→</div>
+      <div class="plain"><b>Medication adjusted</b><span>Your blood pressure tablet (Amlodipine) has been increased from 5mg to 10mg to better control your BP.</span></div>
+      <div class="clin"><code>TSH + Free T4 panel · FBC</code><b>Thyroid function screening: fatigue, family history</b><span>Plus a routine anaemia screen</span></div>
+      <div class="ar" aria-hidden="true">→</div>
+      <div class="plain"><b>Blood tests ordered</b><span>A thyroid test (TSH + T4) and a general blood count were ordered to check on your fatigue.</span></div>
+    </div>
+    <p class="lang-cap rv">Rewritten line by line with the clinical team, so <em>"your blood pressure is getting better"</em> never drifted away from <em>"I10, essential hypertension, controlled."</em></p>
+  </div>
+</section>
+
+<section class="sec alt" aria-labelledby="after-h">
+  <div class="wrap split">
+    <div class="rv">
+      <p class="eyebrow">For the patient</p>
+      <h2 class="h2" id="after-h">After the visit, <em>the app hands it back.</em></h2>
+      <p style="margin-top:20px;max-width:54ch">Once the doctor finalises the summary, the patient app updates on its own. No manual entry: everything flows from the same recording session.</p>
+      <ul class="ticks">
+        <li>Plain-language visit summary, not clinical jargon</li>
+        <li>Medication reminders pre-set from prescription timings</li>
+        <li>Full history for any authorised doctor</li>
+        <li>Lab results and follow-up notifications</li>
+        <li>Prescription as a QR code for the pharmacy</li>
+      </ul>
+    </div>
+    <div class="stack rv">
+      <div class="card"><h3 class="h3">Reminders that set themselves.</h3><p style="margin-top:8px">Nobody configures a reminder schedule after a GP appointment. So the prescription's timings become the reminders, and a dose change updates them on its own.</p></div>
+      <div class="card"><h3 class="h3">No paper script to lose. No test left unexplained.</h3><p style="margin-top:8px">The prescription lives in the app as a QR code any pharmacy can scan, and each pending test says, in plain words, why it was ordered.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec teal" aria-labelledby="val-h">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Validation</p>
+      <h2 class="h2" id="val-h">It went back to <em>the people it was for.</em></h2>
+      <p style="margin-top:20px;max-width:58ch">Doctors tested the prototypes. The sharpest signal was the summary-trust problem: one error collapsing confidence in the whole record. The review flow exists because of how hard they pushed on it.</p>
+    </div>
+    <div class="loop rv">
+      <div><i>01</i><b>Prototype</b><span>Hi-fi screens for doctor and patient</span></div>
+      <div><i>02</i><b>Doctors test it</b><span>Reviewing generated summaries</span></div>
+      <div class="hot"><i>03</i><b>One wrong line</b><span>Confidence in the whole record collapses</span></div>
+      <div><i>04</i><b>The review flow</b><span>Confidence, edits, section by section</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="refl-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">Reflection</p>
+      <h2 class="h2" id="refl-h">What I'd keep, <em>and what I'd change.</em></h2>
+    </div>
+    <div class="kc rv">
+      <div class="col keep">
+        <span class="label">Keep</span>
+        <div class="item"><h3 class="h3">The passive consultation screen.</h3><p>Every push to make it interactive got resisted, and that restraint is what made it work. The consultation is between the doctor and the patient; the app's job is to record it, not join in.</p></div>
+      </div>
+      <div class="col">
+        <span class="label">Change</span>
+        <div class="item"><h3 class="h3">Design consent first.</h3><p>Consent got squeezed to the end of the timeline. In healthcare it belongs at the start, not as a finishing touch. Next time I'd design the "who sees what" flow first.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec dark" aria-labelledby="met-h">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Reflection</p>
+      <h2 class="h2" id="met-h">"Positive feedback" <em>isn't a measurement.</em></h2>
+      <p style="margin-top:18px;max-width:60ch">I didn't set success metrics going in. Next time I'd agree on what good looks like before building, and track these three.</p>
+    </div>
+    <div class="metrics rv">
+      <div class="metric" style="background:var(--c-dark-2)"><span class="label">Metric 01</span><b>Time to finalise a record</b><span>From the end of the session to a signed summary.</span></div>
+      <div class="metric" style="background:var(--c-dark-2)"><span class="label">Metric 02</span><b>Corrections per generated summary</b><span>How much of the draft the doctor has to fix.</span></div>
+      <div class="metric" style="background:var(--c-dark-2)"><span class="label">Metric 03</span><b>Patients opening the app within 24 hours of a visit</b><span>Whether the hand-back actually reaches them.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt" aria-labelledby="learn-h">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">What I learned</p>
+      <h2 class="h2" id="learn-h">Four things <em>this project taught me.</em></h2>
+    </div>
+    <div class="learn rv">
+      <div class="card"><span class="num">01</span><h3 class="h3">Designing for two users means accepting they want opposite things.</h3><p>The doctor wants less to look at; the patient wants more explained. Same data, opposite jobs. The trap would have been forcing them into one interface.</p></div>
+      <div class="card"><span class="num">02</span><h3 class="h3">In healthcare, a tool earns trust before it gets to help.</h3><p>One wrong code in a generated summary and a doctor is done with the whole system. Confidence scoring and the review state weren't polish. They were the price of being used at all.</p></div>
+      <div class="card"><span class="num">03</span><h3 class="h3">Plain language is more work, not less.</h3><p>"Hypertension, controlled" is two words. Saying it so a patient actually understands takes someone who knows both the medicine and the person reading it.</p></div>
+      <div class="card"><span class="num">04</span><h3 class="h3">A screen that asks for nothing is still doing its job.</h3><p>The consultation interface needed zero interaction during the session. Being present without demanding attention was the entire point.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="teal closing" aria-labelledby="close-h">
+  <div class="wrap rv">
+    <p class="eyebrow">The rule, one more time</p>
+    <h2 class="h2" id="close-h">The consultation is between the doctor and the patient. The app's job is to record it, <em>not join in.</em></h2>
+  </div>
+</section>
+
+</main>
+
+<div class="site">
+  <div class="wrap">
+    <a class="next" href="adafsa.html">
+      <span class="nlabel">Next track<b>A2</b></span>
+      <span class="ntitle">ADAFSA Design System<span class="ndesc">34 colours became 9 tokens, and 20 components got 87 variants, built Arabic-first.</span></span>
+      <span class="ngo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+    <footer>
+      <div>
+        <p class="f-lead">Hiring? I'd like to hear from you.</p>
+        <a class="f-mail" href="mailto:ankushmeena0779@gmail.com">ankushmeena0779@gmail.com</a>
+      </div>
+      <div class="f-links">
+        <a href="../index.html#work">All work</a>
+        <a href="https://linkedin.com/in/ankushmeena" rel="noopener" target="_blank">LinkedIn</a>
+        <a href="resume.html">Résumé</a>
+      </div>
+    </footer>
   </div>
 </div>
 
-<!-- ══════ SCREEN 3: PATIENT HISTORY ══════ -->
-<div id="sc-history" class="screen">
-  <div class="app">
-    <div class="sidebar">
-      <div class="sb-top">
-        <div class="sb-lbl">Today</div>
-        <div class="sb-item" onclick="go('consult')">🎙 Live Consultation</div>
-        <div class="sb-item" onclick="go('summary')">📄 Visit Summary</div>
-        <div class="sb-lbl" style="margin-top:14px">Patients</div>
-        <div class="sb-item active">🧑‍⚕️ Patient History</div>
-        <div class="sb-item" onclick="go('prescription')">💊 Prescriptions</div>
-        <div class="sb-item">📅 Appointments <span class="sb-badge">4</span></div>
-      </div>
-      <div class="sb-user"><div class="sb-av">DS</div><div><div class="sb-uname">Dr. S. Krishnan</div><div class="sb-urole">General Practitioner</div></div></div>
-    </div>
-    <div class="main">
-      <div class="pg-hdr">
-        <div><div class="pg-title">Patient History</div><div class="pg-sub">Aisha Mehta · MRN: 00-4471-MH · All treating clinicians</div></div>
-        <div class="hdr-btns">
-          <button class="btn btn-secondary btn-sm">⬇ Export PDF</button>
-          <button class="btn btn-primary btn-sm" onclick="go('consult')">🎙 Start Consultation</button>
-        </div>
-      </div>
-
-      <div class="history-layout">
-        <!-- Patient profile -->
-        <div>
-          <div class="patient-profile-card">
-            <div class="ppcard-avatar">AM</div>
-            <div class="ppcard-name">Aisha Mehta</div>
-            <div class="ppcard-id">MRN: 00-4471-MH</div>
-            <div class="ppcard-meta">
-              <div class="ppcard-meta-row"><span class="ppcard-meta-key">Date of Birth</span><span class="ppcard-meta-val">14 March 1988</span></div>
-              <div class="ppcard-meta-row"><span class="ppcard-meta-key">Age</span><span class="ppcard-meta-val">36 years</span></div>
-              <div class="ppcard-meta-row"><span class="ppcard-meta-key">Gender</span><span class="ppcard-meta-val">Female</span></div>
-              <div class="ppcard-meta-row"><span class="ppcard-meta-key">Blood Group</span><span class="ppcard-meta-val">B+</span></div>
-              <div class="ppcard-meta-row"><span class="ppcard-meta-key">Phone</span><span class="ppcard-meta-val">+91 98XXX XXXXX</span></div>
-            </div>
-            <div class="ppcard-divider"></div>
-            <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Conditions &amp; Allergies</div>
-            <div class="condition-tags">
-              <div class="condition-tag"><div class="condition-dot" style="background:#F5A623"></div>Hypertension (primary)</div>
-              <div class="condition-tag"><div class="condition-dot" style="background:var(--pulse)"></div>Allergy: Penicillin (severe)</div>
-              <div class="condition-tag"><div class="condition-dot" style="background:rgba(255,255,255,0.3)"></div>Family Hx: Thyroid disorder</div>
-            </div>
-            <div class="ppcard-divider"></div>
-            <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Treating Clinicians</div>
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="font-size:11px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:7px"><div style="width:20px;height:20px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">SK</div>Dr. S. Krishnan (GP)</div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:7px"><div style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">RG</div>Dr. R. Gupta (Cardiologist)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Visit timeline -->
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <div style="font-size:13px;font-weight:700;color:var(--ink)">Visit History <span style="font-weight:400;color:var(--muted);font-size:12px">— 7 visits across 3 clinicians</span></div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-ghost btn-sm">All Clinicians ▾</button>
-              <button class="btn btn-ghost btn-sm">Filter ▾</button>
-            </div>
-          </div>
-
-          <div class="visit-timeline">
-            <div class="visit-item">
-              <div class="visit-left"><div class="visit-date-box"><div class="vd-day">24</div><div class="vd-month">Nov</div></div><div class="visit-line"></div></div>
-              <div>
-                <div class="visit-card active">
-                  <div class="vc-top">
-                    <div><div class="vc-doctor">Dr. S. Krishnan</div><div class="vc-facility">Capgemini Health Clinic, Mumbai</div></div>
-                    <span class="badge b-teal">Today</span>
-                  </div>
-                  <div class="vc-chief">Morning headaches, fatigue, hypertension review</div>
-                  <div class="vc-tags">
-                    <div class="vc-tag">BP: 138/88</div>
-                    <div class="vc-tag">Amlodipine ↑ 10mg</div>
-                    <div class="vc-tag">TSH panel ordered</div>
-                  </div>
-                  <div class="vc-footer"><span>8 min 43 sec · Transcript available</span><span style="color:var(--teal)">View Summary →</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="visit-item">
-              <div class="visit-left"><div class="visit-date-box"><div class="vd-day">03</div><div class="vd-month">Sep</div></div><div class="visit-line"></div></div>
-              <div>
-                <div class="visit-card">
-                  <div class="vc-top">
-                    <div><div class="vc-doctor">Dr. S. Krishnan</div><div class="vc-facility">Capgemini Health Clinic, Mumbai</div></div>
-                    <span class="badge b-green">Finalised</span>
-                  </div>
-                  <div class="vc-chief">Hypertension follow-up — 3 month review</div>
-                  <div class="vc-tags">
-                    <div class="vc-tag">BP: 144/92</div>
-                    <div class="vc-tag">Amlodipine 5mg continued</div>
-                    <div class="vc-tag">Lifestyle counselling</div>
-                  </div>
-                  <div class="vc-footer"><span>11 min · Transcript available</span><span style="color:var(--teal)">View →</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="visit-item">
-              <div class="visit-left"><div class="visit-date-box"><div class="vd-day">18</div><div class="vd-month">Jul</div></div><div class="visit-line"></div></div>
-              <div>
-                <div class="visit-card">
-                  <div class="vc-top">
-                    <div><div class="vc-doctor">Dr. R. Gupta</div><div class="vc-facility">Apollo Hospital, Cardiology</div></div>
-                    <span class="badge b-green">Finalised</span>
-                  </div>
-                  <div class="vc-chief">Cardiology referral — hypertension evaluation</div>
-                  <div class="vc-tags">
-                    <div class="vc-tag">Echo: Normal</div>
-                    <div class="vc-tag">ECG: Normal sinus rhythm</div>
-                    <div class="vc-tag">Started Amlodipine</div>
-                  </div>
-                  <div class="vc-footer"><span>22 min · Transcript available</span><span style="color:var(--teal)">View →</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="visit-item">
-              <div class="visit-left"><div class="visit-date-box" style="background:var(--surface2);border-color:var(--border2)"><div class="vd-day" style="color:var(--muted)">04</div><div class="vd-month" style="color:var(--muted)">Jun</div></div><div class="visit-line"></div></div>
-              <div>
-                <div class="visit-card">
-                  <div class="vc-top">
-                    <div><div class="vc-doctor">Dr. S. Krishnan</div><div class="vc-facility">Capgemini Health Clinic, Mumbai</div></div>
-                    <span class="badge b-green">Finalised</span>
-                  </div>
-                  <div class="vc-chief">New diagnosis — hypertension. BP consistently elevated</div>
-                  <div class="vc-tags">
-                    <div class="vc-tag">BP: 158/96</div>
-                    <div class="vc-tag">Referral to cardiology</div>
-                  </div>
-                  <div class="vc-footer"><span>9 min · Transcript available</span><span style="color:var(--teal)">View →</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SCREEN 4: PRESCRIPTION DETAIL ══════ -->
-<div id="sc-prescription" class="screen">
-  <div class="app">
-    <div class="sidebar">
-      <div class="sb-top">
-        <div class="sb-lbl">Today</div>
-        <div class="sb-item" onclick="go('consult')">🎙 Live Consultation</div>
-        <div class="sb-item" onclick="go('summary')">📄 Visit Summary</div>
-        <div class="sb-lbl" style="margin-top:14px">Patients</div>
-        <div class="sb-item" onclick="go('history')">🧑‍⚕️ Patient History</div>
-        <div class="sb-item active">💊 Prescriptions</div>
-        <div class="sb-item">📅 Appointments</div>
-      </div>
-      <div class="sb-user"><div class="sb-av">DS</div><div><div class="sb-uname">Dr. S. Krishnan</div><div class="sb-urole">General Practitioner</div></div></div>
-    </div>
-    <div class="main">
-      <div class="pg-hdr">
-        <div><div class="pg-title">Prescription</div><div class="pg-sub">Aisha Mehta · 24 November 2024 · Ref: RX-2024-11-4471</div></div>
-        <div class="hdr-btns">
-          <button class="btn btn-secondary btn-sm">🖨 Print</button>
-          <button class="btn btn-primary btn-sm">📤 Send to Patient</button>
-        </div>
-      </div>
-
-      <div class="rx-layout">
-        <div>
-          <!-- Rx Header -->
-          <div class="rx-header-block">
-            <div class="rx-brand">
-              <div class="rx-logo-mark">🩺</div>
-              <div class="rx-from">
-                <div class="rx-from-label">Prescribing Physician</div>
-                <div class="rx-from-name">Dr. Suresh Krishnan</div>
-                <div class="rx-from-cred">MBBS, MD (General Medicine) · Reg. No. MCI-044782</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:2px">Capgemini Health Clinic, 5th Floor, BKC, Mumbai 400051</div>
-              </div>
-            </div>
-            <div class="rx-meta-right">
-              <div class="rx-ref">RX-2024-11-4471</div>
-              <div class="rx-date">24 November 2024</div>
-              <div class="rx-valid">✓ Valid for 30 days</div>
-            </div>
-          </div>
-
-          <!-- Patient block -->
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex:1">
-              <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Patient</div><div style="font-size:13px;font-weight:600;color:var(--ink)">Aisha Mehta</div></div>
-              <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">DOB / Age</div><div style="font-size:13px;font-weight:600;color:var(--ink)">14 Mar 1988 / 36F</div></div>
-              <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">MRN</div><div style="font-size:13px;font-weight:600;color:var(--ink);font-family:'JetBrains Mono',monospace">00-4471-MH</div></div>
-            </div>
-            <div style="padding:8px 12px;background:var(--red-lt);border-radius:7px;border:1px solid rgba(214,69,69,0.2);font-size:11px;color:var(--red);font-weight:600;margin-left:20px">⚠ Penicillin allergy</div>
-          </div>
-
-          <!-- Drug 1 -->
-          <div class="drug-card">
-            <div class="drug-card-head">
-              <div>
-                <div class="drug-name-big">Amlodipine Besylate</div>
-                <div class="drug-generic">Norvasc® · Calcium channel blocker (CCB)</div>
-              </div>
-              <div class="drug-strength">10mg</div>
-            </div>
-            <div class="drug-body">
-              <div><div class="drug-field-label">Dose</div><div class="drug-field-val">10 mg</div></div>
-              <div><div class="drug-field-label">Route</div><div class="drug-field-val">Oral</div></div>
-              <div><div class="drug-field-label">Frequency</div><div class="drug-field-val">Once daily</div></div>
-              <div><div class="drug-field-label">Duration</div><div class="drug-field-val">30 days</div></div>
-            </div>
-            <div class="drug-instructions">
-              <div class="drug-inst-label">Instructions for Patient</div>
-              <div class="drug-inst-text">Take one tablet every morning, preferably at the same time each day. Can be taken with or without food. Do not stop taking this medication without consulting your doctor. If you miss a dose, take it as soon as you remember — unless it is almost time for the next dose.</div>
-            </div>
-            <div style="padding:0 18px 14px;display:flex;gap:8px">
-              <span class="badge b-amber">Dose increased from 5mg</span>
-              <span class="badge b-grey">Refills: 2</span>
-            </div>
-          </div>
-
-          <!-- Drug 2 -->
-          <div class="drug-card">
-            <div class="drug-card-head">
-              <div>
-                <div class="drug-name-big">Cholecalciferol (Vitamin D3)</div>
-                <div class="drug-generic">Supplement · Fat-soluble vitamin</div>
-              </div>
-              <div class="drug-strength">1000 IU</div>
-            </div>
-            <div class="drug-body">
-              <div><div class="drug-field-label">Dose</div><div class="drug-field-val">1000 IU</div></div>
-              <div><div class="drug-field-label">Route</div><div class="drug-field-val">Oral</div></div>
-              <div><div class="drug-field-label">Frequency</div><div class="drug-field-val">Once daily</div></div>
-              <div><div class="drug-field-label">Duration</div><div class="drug-field-val">Continue</div></div>
-            </div>
-            <div class="drug-instructions">
-              <div class="drug-inst-label">Instructions for Patient</div>
-              <div class="drug-inst-text">Take one softgel capsule once daily with your main meal for better absorption. No special timing required.</div>
-            </div>
-            <div style="padding:0 18px 14px"><span class="badge b-green">Continued from previous prescription</span></div>
-          </div>
-        </div>
-
-        <!-- Rx sidebar -->
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="card">
-            <div class="card-head"><div class="card-title">Drug Interaction Check</div></div>
-            <div style="padding:14px">
-              <div style="background:var(--green-lt);border-radius:7px;padding:10px 12px;border:1px solid rgba(26,122,63,0.15);margin-bottom:8px">
-                <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:2px">✓ No interactions detected</div>
-                <div style="font-size:11px;color:var(--body-txt)">Amlodipine + Vitamin D3 — safe combination</div>
-              </div>
-              <div style="background:var(--amber-lt);border-radius:7px;padding:10px 12px;border:1px solid rgba(196,122,26,0.15)">
-                <div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:2px">⚠ Note</div>
-                <div style="font-size:11px;color:var(--body-txt)">Grapefruit juice may increase Amlodipine levels — patient counselled</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="card-title">Follow-up Labs</div></div>
-            <div style="padding:14px;display:flex;flex-direction:column;gap:6px">
-              <div style="font-size:12px;color:var(--body-txt);margin-bottom:6px">Results expected before next appointment:</div>
-              <div style="padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border);font-size:11px">
-                <div style="font-weight:600;color:var(--ink)">TSH + Free T4</div>
-                <div style="color:var(--muted);margin-top:1px">Results in 2–3 business days</div>
-              </div>
-              <div style="padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border);font-size:11px">
-                <div style="font-weight:600;color:var(--ink)">Full Blood Count (FBC)</div>
-                <div style="color:var(--muted);margin-top:1px">Results in 1–2 business days</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div class="card-title">Dispensing</div></div>
-            <div style="padding:14px">
-              <div style="font-size:12px;color:var(--body-txt);margin-bottom:10px">Patient can present this prescription (or QR code) at any registered pharmacy.</div>
-              <div style="width:80px;height:80px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:8px">📱</div>
-              <div style="font-size:11px;color:var(--muted)">QR code sent to patient app</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SCREEN 5: PATIENT APP ══════ -->
-<div id="sc-patient" class="screen">
-<style>
-.pa-wrap2 { background: var(--surface); min-height: calc(100vh - 52px); padding: 32px 40px; }
-.pa-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-.pa-header-left { max-width: 420px; }
-.pa-eyebrow { font-size: 11px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-.pa-big-title { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 14px; }
-.pa-desc { font-size: 14px; color: var(--body-txt); line-height: 1.75; margin-bottom: 18px; }
-.pa-feats { display: flex; flex-direction: column; gap: 8px; }
-.pa-feat { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--body-txt); }
-.pa-feat span { color: var(--teal); font-size: 15px; flex-shrink: 0; margin-top: 2px; }
-.phones-carousel { display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
-.phone-tab-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-.phone-tab { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border2); background: white; color: var(--muted); font-family: 'Sora', sans-serif; transition: all 0.15s; }
-.phone-tab.active { background: var(--teal); color: white; border-color: var(--teal); }
-.pa-phones-area { display: flex; gap: 20px; align-items: flex-start; justify-content: center; }
-.pa-phone-wrap { flex-shrink: 0; }
-.pa-phone-label { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.07em; }
-.phone2 { width: 280px; background: var(--ink); border-radius: 36px; padding: 9px; box-shadow: 0 28px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05); }
-.phone2-notch { height: 28px; display: flex; align-items: center; justify-content: center; }
-.phone2-camera { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); }
-.phone2-screen { background: var(--surface); border-radius: 28px; overflow: hidden; display: flex; flex-direction: column; }
-.phone2-status { height: 32px; background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; }
-.phone2-time { font-size: 11px; font-weight: 700; color: white; font-family: 'JetBrains Mono', monospace; }
-.phone2-icons { font-size: 10px; color: rgba(255,255,255,0.65); display: flex; gap: 4px; }
-.phone2-scroll { flex: 1; overflow-y: auto; }
-.phone2-scroll::-webkit-scrollbar { display: none; }
-.phone2-nav { background: white; border-top: 1px solid var(--border); padding: 6px 0; display: flex; flex-shrink: 0; }
-.pn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
-.pn-icon { font-size: 14px; }
-.pn-lbl { font-size: 8px; color: var(--muted); font-weight: 500; }
-.pn-item.act .pn-lbl { color: var(--teal); }
-
-/* screen content helpers */
-.ph-hdr { background: linear-gradient(180deg, var(--teal-dark), var(--teal)); padding: 16px 14px 18px; color: white; }
-.ph-greet { font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 3px; }
-.ph-name { font-size: 15px; font-weight: 700; color: white; margin-bottom: 10px; letter-spacing: -0.01em; }
-.ph-stats { display: flex; gap: 8px; }
-.ph-stat { background: rgba(255,255,255,0.12); border-radius: 7px; padding: 8px 10px; flex: 1; }
-.ph-stat-v { font-size: 13px; font-weight: 700; color: white; }
-.ph-stat-l { font-size: 8px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: .07em; margin-top: 1px; }
-.ph-body { padding: 12px; }
-.ph-sec { font-size: 9px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
-.ph-card { background: white; border-radius: 9px; border: 1px solid var(--border); padding: 11px; margin-bottom: 9px; }
-.ph-alert { border-radius: 9px; padding: 10px 11px; margin-bottom: 9px; display: flex; gap: 8px; align-items: flex-start; }
-.ph-alert.amber { background: var(--amber-lt); border: 1px solid rgba(196,122,26,0.2); }
-.ph-alert.teal { background: var(--teal-lt); border: 1px solid var(--teal-mid); }
-.ph-alert.green { background: var(--green-lt); border: 1px solid rgba(26,122,63,0.2); }
-.ph-alert-ico { font-size: 16px; flex-shrink: 0; }
-.ph-alert-title { font-size: 10px; font-weight: 700; margin-bottom: 2px; }
-.ph-alert.amber .ph-alert-title { color: var(--amber); }
-.ph-alert.teal .ph-alert-title { color: var(--teal-dark); }
-.ph-alert.green .ph-alert-title { color: var(--green); }
-.ph-alert-text { font-size: 10px; color: var(--body-txt); line-height: 1.5; }
-</style>
-
-<div class="pa-wrap2">
-  <div class="pa-header-row">
-    <div class="pa-header-left">
-      <div class="pa-eyebrow">Patient App — 5 Screens</div>
-      <div class="pa-big-title">What the patient sees after every consultation</div>
-      <div class="pa-desc">Once the doctor finalises the visit summary, the patient app updates automatically. No manual entry — everything flows from the same recording session.</div>
-      <div class="pa-feats">
-        <div class="pa-feat"><span>✓</span>Plain-language visit summary — not clinical jargon</div>
-        <div class="pa-feat"><span>✓</span>Medication reminders pre-set from prescription timings</div>
-        <div class="pa-feat"><span>✓</span>Full history visible to any authorised doctor on future visits</div>
-        <div class="pa-feat"><span>✓</span>Lab results and follow-up notifications</div>
-        <div class="pa-feat"><span>✓</span>Prescription available as QR code for pharmacy</div>
-      </div>
-    </div>
-    <div>
-      <div class="phone-tab-row">
-        <button class="phone-tab active" onclick="showPhone(0)">Home</button>
-        <button class="phone-tab" onclick="showPhone(1)">Visit Summary</button>
-        <button class="phone-tab" onclick="showPhone(2)">Medications</button>
-        <button class="phone-tab" onclick="showPhone(3)">History</button>
-        <button class="phone-tab" onclick="showPhone(4)">Prescription</button>
-        <button class="phone-tab" onclick="showPhone(5)">Lab Results</button>
-        <button class="phone-tab" onclick="showPhone(6)">Notifications</button>
-        <button class="phone-tab" onclick="showPhone(7)">Doctor Access</button>
-        <button class="phone-tab" onclick="showPhone(8)">Profile</button>
-      </div>
-      <div class="pa-phones-area">
-
-        <!-- ── PHONE 1: HOME ── -->
-        <div class="pa-phone-wrap" id="ph-0">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">9:41</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div class="ph-hdr">
-                  <div class="ph-greet">Good morning,</div>
-                  <div class="ph-name">Aisha Mehta</div>
-                  <div class="ph-stats">
-                    <div class="ph-stat"><div class="ph-stat-v">7</div><div class="ph-stat-l">Visits</div></div>
-                    <div class="ph-stat"><div class="ph-stat-v">2</div><div class="ph-stat-l">Meds</div></div>
-                    <div class="ph-stat"><div class="ph-stat-v">2</div><div class="ph-stat-l">Labs</div></div>
-                  </div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-alert amber">
-                    <div class="ph-alert-ico">🧪</div>
-                    <div><div class="ph-alert-title">Lab tests ordered</div><div class="ph-alert-text">TSH + Free T4 and FBC from today's visit. Results in 2–3 days.</div></div>
-                  </div>
-                  <div class="ph-sec">Recent Visit</div>
-                  <div class="ph-card">
-                    <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Today · 24 November 2024</div>
-                    <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px">Dr. S. Krishnan</div>
-                    <div style="font-size:11px;color:var(--body-txt);margin-bottom:8px">Blood pressure improving. Medication adjusted.</div>
-                    <div style="display:flex;gap:5px;flex-wrap:wrap">
-                      <span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--teal-lt);color:var(--teal-dark);font-weight:500">BP: 138/88 ↓</span>
-                      <span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--teal-lt);color:var(--teal-dark);font-weight:500">Amlodipine ↑</span>
-                    </div>
-                    <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:10px;color:var(--teal)">View full summary →</div>
-                  </div>
-                  <div class="ph-sec">Today's Medications</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:9px 11px;margin-bottom:7px;display:flex;align-items:center;gap:9px">
-                    <div style="width:28px;height:28px;border-radius:7px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">💊</div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">Amlodipine 10mg</div><div style="font-size:10px;color:var(--muted)">Morning · 8:00 AM</div></div>
-                    <div style="background:var(--teal-lt);color:var(--teal-dark);font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px">Due</div>
-                  </div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:9px 11px;display:flex;align-items:center;gap:9px">
-                    <div style="width:28px;height:28px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🌞</div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">Vitamin D3 1000 IU</div><div style="font-size:10px;color:var(--muted)">With meal</div></div>
-                    <div style="background:var(--surface2);color:var(--muted);font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px">Taken ✓</div>
-                  </div>
-                  <div class="ph-sec" style="margin-top:12px">Next Appointment</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:11px">
-                    <div style="width:38px;height:38px;background:var(--teal-lt);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
-                      <div style="font-size:13px;font-weight:700;color:var(--teal-dark)">12</div>
-                      <div style="font-size:8px;color:var(--teal);text-transform:uppercase;font-weight:600">Dec</div>
-                    </div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">Dr. S. Krishnan</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Results review · 10:30 AM</div></div>
-                    <div style="font-size:10px;color:var(--teal);font-weight:600">Confirm</div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item act"><div class="pn-icon">🏠</div><div class="pn-lbl" style="color:var(--teal)">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Home</div>
-        </div>
-
-        <!-- ── PHONE 2: VISIT SUMMARY ── -->
-        <div class="pa-phone-wrap" id="ph-1" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">9:44</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:9px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:flex;align-items:center;gap:5px"><span style="font-size:12px">←</span> Back to home</div>
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Visit Summary</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">24 November 2024 · Dr. S. Krishnan</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-alert green">
-                    <div class="ph-alert-ico">✓</div>
-                    <div><div class="ph-alert-title">Good news — blood pressure improving</div><div class="ph-alert-text">Your BP today was 138/88, down from 144/92 at your last visit three months ago.</div></div>
-                  </div>
-                  <div class="ph-sec">What we discussed</div>
-                  <div class="ph-card">
-                    <div style="font-size:11px;color:var(--body-txt);line-height:1.7">You came in about <strong style="color:var(--ink)">morning headaches</strong> over the past two weeks, and some <strong style="color:var(--ink)">afternoon fatigue</strong>. Dr. Krishnan checked your blood pressure and reviewed your medication.</div>
-                  </div>
-                  <div class="ph-sec">What was decided</div>
-                  <div class="ph-card" style="margin-bottom:7px">
-                    <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">💊 Medication adjusted</div>
-                    <div style="font-size:11px;color:var(--body-txt);line-height:1.65">Your blood pressure tablet (Amlodipine) has been increased from 5mg to 10mg to better control your BP.</div>
-                  </div>
-                  <div class="ph-card" style="margin-bottom:7px">
-                    <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">🧪 Blood tests ordered</div>
-                    <div style="font-size:11px;color:var(--body-txt);line-height:1.65">A thyroid test (TSH + T4) and a general blood count were ordered to check on your fatigue. Results in 2–3 days.</div>
-                  </div>
-                  <div class="ph-card">
-                    <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">📅 Follow-up</div>
-                    <div style="font-size:11px;color:var(--body-txt);line-height:1.65">Return in 4 weeks to review test results. Contact the clinic sooner if headaches get worse or you experience any vision changes.</div>
-                  </div>
-                  <div class="ph-sec" style="margin-top:12px">Full transcript</div>
-                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px">
-                    <div style="font-size:20px">🎙</div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">Consultation recording</div><div style="font-size:10px;color:var(--muted);margin-top:1px">8 min 43 sec · 24 Nov 2024</div></div>
-                    <div style="font-size:10px;color:var(--teal);font-weight:600">Listen →</div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item act"><div class="pn-icon">📋</div><div class="pn-lbl" style="color:var(--teal)">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Visit Summary</div>
-        </div>
-
-        <!-- ── PHONE 3: MEDICATIONS ── -->
-        <div class="pa-phone-wrap" id="ph-2" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">9:47</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Medications</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">2 active · updated today</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-sec">Today's schedule</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);overflow:hidden;margin-bottom:9px">
-                    <div style="padding:11px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px">
-                      <div style="width:32px;height:32px;border-radius:8px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💊</div>
-                      <div style="flex:1">
-                        <div style="font-size:12px;font-weight:700;color:var(--ink)">Amlodipine 10mg</div>
-                        <div style="font-size:10px;color:var(--muted);margin-top:1px">Blood pressure tablet</div>
-                        <div style="margin-top:6px;font-size:10px;color:var(--body-txt);line-height:1.55">Take one tablet every morning. Can be taken with or without food. Avoid grapefruit juice.</div>
-                      </div>
-                    </div>
-                    <div style="padding:9px 11px;background:var(--surface);display:flex;align-items:center;justify-content:space-between">
-                      <div style="font-size:10px;color:var(--muted)">⏰ 8:00 AM daily</div>
-                      <div style="background:var(--teal-lt);color:var(--teal-dark);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px">Reminder set ✓</div>
-                    </div>
-                  </div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);overflow:hidden;margin-bottom:9px">
-                    <div style="padding:11px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px">
-                      <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🌞</div>
-                      <div style="flex:1">
-                        <div style="font-size:12px;font-weight:700;color:var(--ink)">Vitamin D3 1000 IU</div>
-                        <div style="font-size:10px;color:var(--muted);margin-top:1px">Supplement</div>
-                        <div style="margin-top:6px;font-size:10px;color:var(--body-txt);line-height:1.55">Take one capsule with your main meal for better absorption.</div>
-                      </div>
-                    </div>
-                    <div style="padding:9px 11px;background:var(--surface);display:flex;align-items:center;justify-content:space-between">
-                      <div style="font-size:10px;color:var(--muted)">🍽 With main meal</div>
-                      <div style="background:var(--green-lt);color:var(--green);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px">Taken today ✓</div>
-                    </div>
-                  </div>
-                  <div class="ph-sec" style="margin-top:4px">Dose change — updated today</div>
-                  <div class="ph-alert amber">
-                    <div class="ph-alert-ico">⚠️</div>
-                    <div><div class="ph-alert-title">Amlodipine increased to 10mg</div><div class="ph-alert-text">Dr. Krishnan adjusted your dose today. Your reminders have been updated. Contact the clinic if you notice any new side effects.</div></div>
-                  </div>
-                  <div class="ph-sec">Refill reminder</div>
-                  <div class="ph-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center">
-                      <div><div style="font-size:11px;font-weight:600;color:var(--ink)">Amlodipine 10mg</div><div style="font-size:10px;color:var(--muted);margin-top:1px">30 tablets · ~30 days supply</div></div>
-                      <div style="font-size:10px;color:var(--teal);font-weight:600">Prescription ↗</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item act"><div class="pn-icon">💊</div><div class="pn-lbl" style="color:var(--teal)">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Medications</div>
-        </div>
-
-        <!-- ── PHONE 4: HISTORY ── -->
-        <div class="pa-phone-wrap" id="ph-3" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">9:50</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">My Health History</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">7 visits · 2 doctors</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-sec">Visit timeline</div>
-                  <!-- Visit items -->
-                  <div style="display:flex;gap:10px;margin-bottom:7px">
-                    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:36px;height:36px;background:var(--teal-lt);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:12px;font-weight:700;color:var(--teal-dark)">24</div><div style="font-size:7px;color:var(--teal);font-weight:600;text-transform:uppercase">Nov</div></div><div style="width:1.5px;flex:1;background:var(--border);margin:3px auto;min-height:8px"></div></div>
-                    <div style="background:white;border-radius:8px;border:1.5px solid var(--teal);padding:9px 11px;flex:1;margin-bottom:7px">
-                      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Today</div>
-                      <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px">Dr. Krishnan — GP</div>
-                      <div style="font-size:10px;color:var(--body-txt)">BP review, headaches, fatigue</div>
-                      <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
-                        <span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--teal-lt);color:var(--teal-dark)">BP: 138/88</span>
-                        <span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--teal-lt);color:var(--teal-dark)">Meds adjusted</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:10px;margin-bottom:7px">
-                    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:36px;height:36px;background:var(--surface2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:12px;font-weight:700;color:var(--muted)">03</div><div style="font-size:7px;color:var(--muted);font-weight:600;text-transform:uppercase">Sep</div></div><div style="width:1.5px;flex:1;background:var(--border);margin:3px auto;min-height:8px"></div></div>
-                    <div style="background:white;border-radius:8px;border:1px solid var(--border);padding:9px 11px;flex:1;margin-bottom:7px">
-                      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">3 months ago</div>
-                      <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px">Dr. Krishnan — GP</div>
-                      <div style="font-size:10px;color:var(--body-txt)">Blood pressure follow-up</div>
-                      <div style="display:flex;gap:4px;margin-top:6px"><span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--surface2);color:var(--muted)">BP: 144/92</span></div>
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:10px;margin-bottom:7px">
-                    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:36px;height:36px;background:var(--surface2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:12px;font-weight:700;color:var(--muted)">18</div><div style="font-size:7px;color:var(--muted);font-weight:600;text-transform:uppercase">Jul</div></div><div style="width:1.5px;flex:1;background:var(--border);margin:3px auto;min-height:8px"></div></div>
-                    <div style="background:white;border-radius:8px;border:1px solid var(--border);padding:9px 11px;flex:1;margin-bottom:7px">
-                      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">5 months ago</div>
-                      <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px">Dr. R. Gupta — Cardiologist</div>
-                      <div style="font-size:10px;color:var(--body-txt)">Heart evaluation · Apollo Hospital</div>
-                      <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap"><span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--surface2);color:var(--muted)">Echo normal</span><span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--surface2);color:var(--muted)">Meds started</span></div>
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:10px">
-                    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:36px;height:36px;background:var(--surface2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:12px;font-weight:700;color:var(--muted)">04</div><div style="font-size:7px;color:var(--muted);font-weight:600;text-transform:uppercase">Jun</div></div></div>
-                    <div style="background:white;border-radius:8px;border:1px solid var(--border);padding:9px 11px;flex:1">
-                      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">6 months ago</div>
-                      <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px">Dr. Krishnan — GP</div>
-                      <div style="font-size:10px;color:var(--body-txt)">First diagnosis — high blood pressure</div>
-                      <div style="display:flex;gap:4px;margin-top:6px"><span style="font-size:8px;padding:1px 6px;border-radius:8px;background:var(--red-lt);color:var(--red)">BP: 158/96</span></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item act"><div class="pn-icon">📋</div><div class="pn-lbl" style="color:var(--teal)">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Health History</div>
-        </div>
-
-        <!-- ── PHONE 5: PRESCRIPTION / LABS ── -->
-        <div class="pa-phone-wrap" id="ph-4" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">9:53</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Prescription</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">RX-2024-11-4471 · 24 November 2024</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-alert teal" style="margin-bottom:12px">
-                    <div class="ph-alert-ico">📱</div>
-                    <div><div class="ph-alert-title">Show QR at any pharmacy</div><div class="ph-alert-text">Present this screen or the QR code below to collect your medication. No printed prescription needed.</div></div>
-                  </div>
-                  <!-- QR mockup -->
-                  <div style="background:white;border-radius:10px;border:1px solid var(--border);padding:16px;text-align:center;margin-bottom:9px">
-                    <div style="width:100px;height:100px;margin:0 auto 10px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;border:2px dashed var(--border2)">📱</div>
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);margin-bottom:3px">RX-2024-11-4471</div>
-                    <div style="font-size:10px;color:var(--muted)">Valid until 24 December 2024</div>
-                    <div style="margin-top:10px;background:var(--green-lt);color:var(--green);font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;display:inline-block">✓ Valid prescription</div>
-                  </div>
-                  <div class="ph-sec">Prescribed medications</div>
-                  <div class="ph-card" style="margin-bottom:7px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-                      <div style="font-size:12px;font-weight:700;color:var(--ink)">Amlodipine 10mg</div>
-                      <div style="font-size:9px;color:var(--amber);background:var(--amber-lt);padding:2px 6px;border-radius:3px;font-weight:600">Dose ↑</div>
-                    </div>
-                    <div style="font-size:10px;color:var(--body-txt);line-height:1.6">1 tablet · Once daily · Morning · 30 days supply · 2 refills remaining</div>
-                  </div>
-                  <div class="ph-card">
-                    <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px">Vitamin D3 1000 IU</div>
-                    <div style="font-size:10px;color:var(--body-txt);line-height:1.6">1 capsule · With main meal · Continue as needed</div>
-                  </div>
-                  <div class="ph-sec" style="margin-top:12px">Pending lab results</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:9px">
-                    <div style="font-size:20px">🧪</div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">TSH + Free T4</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Thyroid function · Results in 2–3 days</div></div>
-                    <div style="font-size:9px;background:var(--amber-lt);color:var(--amber);font-weight:700;padding:2px 6px;border-radius:3px">Pending</div>
-                  </div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:9px">
-                    <div style="font-size:20px">🩸</div>
-                    <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--ink)">Full Blood Count</div><div style="font-size:10px;color:var(--muted);margin-top:1px">General screen · Results in 1–2 days</div></div>
-                    <div style="font-size:9px;background:var(--amber-lt);color:var(--amber);font-weight:700;padding:2px 6px;border-radius:3px">Pending</div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item act"><div class="pn-icon">🧪</div><div class="pn-lbl" style="color:var(--teal)">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Prescription & Labs</div>
-        </div>
-
-
-        <!-- ── PHONE 6: LAB RESULTS ── -->
-        <div class="pa-phone-wrap" id="ph-5" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">10:12</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Lab Results</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">2 pending · ordered today</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-alert amber" style="margin-bottom:12px">
-                    <div class="ph-alert-ico">⏳</div>
-                    <div><div class="ph-alert-title">Results on their way</div><div class="ph-alert-text">You'll get a notification as soon as your results are ready. Dr. Krishnan will review them at your next appointment on 12 Dec.</div></div>
-                  </div>
-                  <div class="ph-sec">Pending</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:8px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-                      <div><div style="font-size:12px;font-weight:700;color:var(--ink)">TSH + Free T4</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Thyroid function test</div></div>
-                      <span style="background:var(--amber-lt);color:var(--amber);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Pending</span>
-                    </div>
-                    <div style="font-size:10px;color:var(--body-txt);line-height:1.6;background:var(--surface);padding:8px 10px;border-radius:6px">This test checks how well your thyroid gland is working. Ordered because of your fatigue and family history of thyroid problems.</div>
-                    <div style="font-size:10px;color:var(--muted);margin-top:7px">Expected: 26–27 November</div>
-                  </div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:16px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-                      <div><div style="font-size:12px;font-weight:700;color:var(--ink)">Full Blood Count</div><div style="font-size:10px;color:var(--muted);margin-top:1px">General blood test</div></div>
-                      <span style="background:var(--amber-lt);color:var(--amber);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Pending</span>
-                    </div>
-                    <div style="font-size:10px;color:var(--body-txt);line-height:1.6;background:var(--surface);padding:8px 10px;border-radius:6px">Checks your red and white blood cells and other markers. Helps rule out anaemia as a cause of your fatigue.</div>
-                    <div style="font-size:10px;color:var(--muted);margin-top:7px">Expected: 25–26 November</div>
-                  </div>
-                  <div class="ph-sec">Previous results</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:8px">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink)">Lipid Panel</div>
-                      <span style="background:var(--green-lt);color:var(--green);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Normal</span>
-                    </div>
-                    <div style="font-size:10px;color:var(--muted)">03 September 2024 · Dr. S. Krishnan</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
-                      <div style="background:var(--surface);padding:6px 8px;border-radius:5px"><div style="font-size:9px;color:var(--muted)">Total Cholesterol</div><div style="font-size:11px;font-weight:600;color:var(--ink)">4.8 mmol/L</div></div>
-                      <div style="background:var(--surface);padding:6px 8px;border-radius:5px"><div style="font-size:9px;color:var(--muted)">LDL</div><div style="font-size:11px;font-weight:600;color:var(--ink)">2.9 mmol/L</div></div>
-                    </div>
-                  </div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink)">HbA1c (Blood Sugar)</div>
-                      <span style="background:var(--green-lt);color:var(--green);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Normal</span>
-                    </div>
-                    <div style="font-size:10px;color:var(--muted)">04 June 2024 · Dr. S. Krishnan</div>
-                    <div style="background:var(--surface);padding:6px 8px;border-radius:5px;margin-top:8px"><div style="font-size:9px;color:var(--muted)">Result</div><div style="font-size:11px;font-weight:600;color:var(--ink)">5.4% — within normal range</div></div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item act"><div class="pn-icon">🧪</div><div class="pn-lbl" style="color:var(--teal)">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Lab Results</div>
-        </div>
-
-        <!-- ── PHONE 7: NOTIFICATIONS ── -->
-        <div class="pa-phone-wrap" id="ph-6" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">10:18</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Notifications</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">4 new today</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-sec">Today</div>
-
-                  <!-- Notification items -->
-                  <div style="background:white;border-radius:9px;border:1px solid var(--teal-mid);padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
-                    <div style="width:32px;height:32px;border-radius:8px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📋</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Visit summary ready</div>
-                      <div style="font-size:10px;color:var(--body-txt);line-height:1.55;margin-bottom:4px">Your summary from today's appointment with Dr. Krishnan is now available. Tap to read what was discussed.</div>
-                      <div style="font-size:9px;color:var(--muted)">10:02 AM · Tap to view</div>
-                    </div>
-                  </div>
-
-                  <div style="background:white;border-radius:9px;border:1px solid var(--teal-mid);padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
-                    <div style="width:32px;height:32px;border-radius:8px;background:var(--teal-lt);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💊</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Prescription updated</div>
-                      <div style="font-size:10px;color:var(--body-txt);line-height:1.55;margin-bottom:4px">Your Amlodipine dose has been increased to 10mg. Your morning reminders have been updated automatically.</div>
-                      <div style="font-size:9px;color:var(--muted)">10:02 AM · Tap to view prescription</div>
-                    </div>
-                  </div>
-
-                  <div style="background:var(--amber-lt);border-radius:9px;border:1px solid rgba(196,122,26,0.2);padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
-                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(196,122,26,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🧪</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:2px">Blood tests ordered</div>
-                      <div style="font-size:10px;color:var(--body-txt);line-height:1.55;margin-bottom:4px">TSH + Free T4 and Full Blood Count have been ordered. You'll be notified when results are ready in 2–3 days.</div>
-                      <div style="font-size:9px;color:var(--muted)">10:02 AM</div>
-                    </div>
-                  </div>
-
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
-                    <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📅</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Follow-up appointment suggested</div>
-                      <div style="font-size:10px;color:var(--body-txt);line-height:1.55;margin-bottom:4px">Dr. Krishnan has suggested a follow-up on 12 December at 10:30 AM to review your test results.</div>
-                      <div style="display:flex;gap:6px;margin-top:6px">
-                        <div style="background:var(--teal);color:white;font-size:9px;font-weight:700;padding:3px 10px;border-radius:4px">Confirm</div>
-                        <div style="background:var(--surface2);color:var(--muted);font-size:9px;font-weight:600;padding:3px 10px;border-radius:4px">Reschedule</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="ph-sec">Yesterday</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;opacity:0.7">
-                    <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">⏰</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px">Medication reminder</div>
-                      <div style="font-size:10px;color:var(--body-txt);line-height:1.55">Time to take your Amlodipine 5mg. Morning dose.</div>
-                      <div style="font-size:9px;color:var(--muted);margin-top:3px">8:00 AM · 23 Nov</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item"><div class="pn-icon">👤</div><div class="pn-lbl">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Notifications</div>
-        </div>
-
-        <!-- ── PHONE 8: DOCTOR ACCESS / CONSENT ── -->
-        <div class="pa-phone-wrap" id="ph-7" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">10:24</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:var(--ink);padding:14px 14px 16px;color:white">
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Doctor Access</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">You control who sees your records</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-alert teal" style="margin-bottom:12px">
-                    <div class="ph-alert-ico">🔒</div>
-                    <div><div class="ph-alert-title">Your records are private by default</div><div class="ph-alert-text">Only doctors you authorise can access your full history. You can remove access at any time.</div></div>
-                  </div>
-
-                  <div class="ph-sec">Authorised doctors</div>
-
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:12px 13px;margin-bottom:8px">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                      <div style="width:36px;height:36px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0">SK</div>
-                      <div style="flex:1">
-                        <div style="font-size:12px;font-weight:700;color:var(--ink)">Dr. S. Krishnan</div>
-                        <div style="font-size:10px;color:var(--muted)">GP · Capgemini Health Clinic</div>
-                      </div>
-                      <span style="background:var(--green-lt);color:var(--green);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Primary</span>
-                    </div>
-                    <div style="background:var(--surface);padding:8px 10px;border-radius:6px;font-size:10px;color:var(--body-txt)">Access to full history · Can add visits and prescriptions</div>
-                  </div>
-
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:12px 13px;margin-bottom:8px">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0">RG</div>
-                      <div style="flex:1">
-                        <div style="font-size:12px;font-weight:700;color:var(--ink)">Dr. R. Gupta</div>
-                        <div style="font-size:10px;color:var(--muted)">Cardiologist · Apollo Hospital</div>
-                      </div>
-                      <span style="background:var(--blue-lt);color:var(--blue);font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Specialist</span>
-                    </div>
-                    <div style="background:var(--surface);padding:8px 10px;border-radius:6px;font-size:10px;color:var(--body-txt);margin-bottom:8px">View-only access · Referred by Dr. Krishnan on 04 Jun 2024</div>
-                    <div style="font-size:10px;color:var(--red);font-weight:600;display:flex;align-items:center;gap:4px;cursor:pointer">✕ Remove access</div>
-                  </div>
-
-                  <div style="border:1.5px dashed var(--border2);border-radius:9px;padding:14px;text-align:center;margin-bottom:16px;cursor:pointer">
-                    <div style="font-size:20px;margin-bottom:6px">＋</div>
-                    <div style="font-size:11px;font-weight:600;color:var(--teal)">Add a doctor</div>
-                    <div style="font-size:10px;color:var(--muted);margin-top:3px">Share a code or enter their practitioner ID</div>
-                  </div>
-
-                  <div class="ph-sec">What doctors can see</div>
-                  <div style="display:flex;flex-direction:column;gap:6px">
-                    <div style="background:white;border-radius:7px;border:1px solid var(--border);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">📋 All visit summaries</span>
-                      <span style="color:var(--green);font-weight:600">Visible</span>
-                    </div>
-                    <div style="background:white;border-radius:7px;border:1px solid var(--border);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">💊 Prescription history</span>
-                      <span style="color:var(--green);font-weight:600">Visible</span>
-                    </div>
-                    <div style="background:white;border-radius:7px;border:1px solid var(--border);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">🧪 Lab results</span>
-                      <span style="color:var(--green);font-weight:600">Visible</span>
-                    </div>
-                    <div style="background:white;border-radius:7px;border:1px solid var(--border);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">🎙 Session transcripts</span>
-                      <span style="color:var(--amber);font-weight:600">Your choice</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item act"><div class="pn-icon">👤</div><div class="pn-lbl" style="color:var(--teal)">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Doctor Access</div>
-        </div>
-
-        <!-- ── PHONE 9: PROFILE ── -->
-        <div class="pa-phone-wrap" id="ph-8" style="display:none">
-          <div class="phone2">
-            <div class="phone2-notch"><div class="phone2-camera"></div></div>
-            <div class="phone2-screen">
-              <div class="phone2-status"><div class="phone2-time">10:31</div><div class="phone2-icons"><span>📶</span><span>🔋</span></div></div>
-              <div class="phone2-scroll" style="height:520px">
-                <div style="background:linear-gradient(180deg,var(--ink),var(--ink-soft));padding:20px 16px 22px;text-align:center">
-                  <div style="width:56px;height:56px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 10px">AM</div>
-                  <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Aisha Mehta</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,0.45)">MRN: 00-4471-MH · B+</div>
-                </div>
-                <div class="ph-body">
-                  <div class="ph-sec">Personal details</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px">
-                    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Date of birth</span><span style="font-weight:600;color:var(--ink)">14 March 1988</span></div>
-                    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Blood group</span><span style="font-weight:600;color:var(--ink)">B Positive</span></div>
-                    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Gender</span><span style="font-weight:600;color:var(--ink)">Female</span></div>
-                    <div style="padding:9px 13px;display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--muted)">Phone</span><span style="font-weight:600;color:var(--ink)">+91 98XXX XXXXX</span></div>
-                  </div>
-
-                  <div class="ph-sec">Allergies &amp; conditions</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px">
-                    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
-                      <span style="font-size:16px">⚠️</span>
-                      <div><div style="font-size:11px;font-weight:700;color:var(--red)">Penicillin — severe allergy</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Antibiotic · Do not prescribe</div></div>
-                    </div>
-                    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
-                      <span style="font-size:16px">❤️</span>
-                      <div><div style="font-size:11px;font-weight:600;color:var(--ink)">Hypertension (primary)</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Diagnosed June 2024 · Managed</div></div>
-                    </div>
-                    <div style="padding:9px 13px;display:flex;align-items:center;gap:8px">
-                      <span style="font-size:16px">🧬</span>
-                      <div><div style="font-size:11px;font-weight:600;color:var(--ink)">Family history: thyroid disorder</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Maternal · Under investigation</div></div>
-                    </div>
-                  </div>
-
-                  <div class="ph-sec">Emergency contact</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
-                    <div style="width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px">👩</div>
-                    <div style="flex:1">
-                      <div style="font-size:11px;font-weight:700;color:var(--ink)">Priya Mehta</div>
-                      <div style="font-size:10px;color:var(--muted)">Sister · +91 99XXX XXXXX</div>
-                    </div>
-                    <div style="font-size:10px;color:var(--teal);font-weight:600">Edit</div>
-                  </div>
-
-                  <div class="ph-sec">App settings</div>
-                  <div style="background:white;border-radius:9px;border:1px solid var(--border);overflow:hidden">
-                    <div style="padding:11px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">Medication reminders</span>
-                      <div style="width:32px;height:18px;background:var(--teal);border-radius:9px;position:relative"><div style="width:14px;height:14px;background:white;border-radius:50%;position:absolute;right:2px;top:2px"></div></div>
-                    </div>
-                    <div style="padding:11px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">Lab result notifications</span>
-                      <div style="width:32px;height:18px;background:var(--teal);border-radius:9px;position:relative"><div style="width:14px;height:14px;background:white;border-radius:50%;position:absolute;right:2px;top:2px"></div></div>
-                    </div>
-                    <div style="padding:11px 13px;display:flex;justify-content:space-between;align-items:center;font-size:11px">
-                      <span style="color:var(--body-txt)">Share records with new doctors</span>
-                      <div style="width:32px;height:18px;background:var(--surface2);border-radius:9px;position:relative;border:1px solid var(--border2)"><div style="width:14px;height:14px;background:white;border-radius:50%;position:absolute;left:2px;top:1px;border:1px solid var(--border2)"></div></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="phone2-nav">
-                <div class="pn-item"><div class="pn-icon">🏠</div><div class="pn-lbl">Home</div></div>
-                <div class="pn-item"><div class="pn-icon">📋</div><div class="pn-lbl">History</div></div>
-                <div class="pn-item"><div class="pn-icon">💊</div><div class="pn-lbl">Meds</div></div>
-                <div class="pn-item"><div class="pn-icon">🧪</div><div class="pn-lbl">Labs</div></div>
-                <div class="pn-item act"><div class="pn-icon">👤</div><div class="pn-lbl" style="color:var(--teal)">Profile</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="pa-phone-label">Profile</div>
-        </div>
-
-      </div><!-- end phones area -->
-    </div>
-  </div>
+<div class="mail-pop" id="mail-pop" role="status" aria-live="polite">
+  <span class="mp-msg"><b>Copied</b> ankushmeena0779@gmail.com</span>
+  <a class="mp-gmail" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=ankushmeena0779@gmail.com" target="_blank" rel="noopener">Open in Gmail</a>
+  <a href="mailto:ankushmeena0779@gmail.com">Mail app</a>
+  <button type="button" id="mail-close" aria-label="Dismiss">Close</button>
 </div>
 
 <script>
-function showPhone(idx) {
-  for (let i = 0; i < 9; i++) {
-    const el = document.getElementById('ph-' + i);
-    if (el) el.style.display = i === idx ? 'block' : 'none';
-  }
-  document.querySelectorAll('.phone-tab').forEach((t, i) => {
-    t.classList.toggle('active', i === idx);
-  });
-}
+window.CS_PROTO = {
+  app: 'mediscribe-app.html', host: 'MediScribe', title: 'MediScribe prototype',
+  vw: 1440, vh: 900, color: '#0A7B74', ring: 'rgba(10,123,116,.28)',
+  screens: [
+    { id: 'consult', step: 'In the room', name: 'Live consultation', cap: 'The doctor, during the visit',
+      kicker: 'In the room · Live consultation', title: 'Present in the room, <em>without asking for attention.</em>',
+      marks: [
+        { n: 1, t: 'Recording, at a glance', d: 'One status line says it’s listening. The only action is ending the session.', sel: '#sc-consult .recording-banner', x: 0, y: 0, dx: 6, dy: 6 },
+        { n: 2, t: 'Picked out as it’s said', d: 'Symptoms, drugs and tests are highlighted in the live transcript.', sel: '#sc-consult .highlight', i: 0, x: 1, y: .5, dx: 12 },
+        { n: 3, t: 'Safety facts stay in view', d: 'The penicillin allergy, conditions and family history sit beside the conversation.', sel: '#sc-consult .pctx-alert', i: 0, x: 0, y: .5, dx: -14 },
+        { n: 4, t: 'Suggestions without buttons', d: 'Each one cites its source, like NICE CG138 or the BNF. Nothing to accept or dismiss.', sel: '#sc-consult .ai-card', x: 0, y: 0 },
+        { n: 5, t: 'The last visit, without a search', d: 'Today’s 138/88 sits next to September’s 144/92.', sel: '#sc-consult .ai-item', i: 2, x: 0, y: .5, dx: -14 }
+      ] },
+    { id: 'summary', step: 'Reviewed', name: 'Visit summary', cap: 'The doctor, after the visit',
+      kicker: 'The record · Visit summary', title: 'The app drafts the record. <em>The doctor signs it.</em>',
+      marks: [
+        { n: 1, t: 'Nothing is filed until it’s signed', d: 'Edit and Finalise record sit at the top of every summary.', sel: '#sc-summary', txt: 'Finalise Record', x: 0, y: .5, dx: -14 },
+        { n: 2, t: 'Arrives as a draft', d: 'Labelled auto-generated and pending review, never filed as final.', sel: '#sc-summary', txt: 'Pending Review', x: 0, y: .5, dx: -14 },
+        { n: 3, t: 'Confidence on show', d: '94.2% confidence across 412 words and 14 speaker turns.', sel: '#sc-summary', txt: 'Session Info', x: 0, y: .5, dx: -14 },
+        { n: 4, t: 'Shared only after sign-off', d: 'Once finalised, it reaches Aisha’s app and any clinician she authorises.', sel: '#sc-summary', txt: 'Patient Access', x: 0, y: .5, dx: -14 },
+        { n: 5, t: 'Codes beside the words', d: 'ICD-10 codes sit next to the clinical wording, so a wrong one is easy to spot.', sel: '#sc-summary .diag-code', i: 0, x: 0, y: .5, dx: -14 }
+      ] },
+    { id: 'history', step: 'Clinical', name: 'Patient history', cap: 'For the next doctor',
+      kicker: 'For the next doctor · Patient history', title: 'The whole history, <em>without a phone call.</em>',
+      marks: [
+        { n: 1, t: 'Allergies and conditions lead', d: 'Penicillin allergy, hypertension and family history sit at the top of her profile.', sel: '#sc-history', txt: 'Allergy: Penicillin', x: 0, y: .5, dx: -14 },
+        { n: 2, t: 'Every clinician, one timeline', d: 'The cardiologist’s visit sits between the GP’s, with no phone call to the GP’s office.', sel: '#sc-history .visit-item', i: 2, x: 0, y: 0, dx: 4 },
+        { n: 3, t: 'Each visit in a few facts', d: 'The reading, the dose change and the tests ordered, readable at a glance.', sel: '#sc-history .visit-card', i: 0, x: 1, y: .5, dx: -16 },
+        { n: 4, t: 'The source is one click away', d: 'Every visit keeps its transcript.', sel: '#sc-history', txt: 'Transcript available', x: 0, y: .5, dx: -14 },
+        { n: 5, t: 'Who else is treating her', d: 'Her GP and cardiologist are listed on the record.', sel: '#sc-history', txt: 'Treating Clinicians', x: 0, y: .5, dx: -14 }
+      ] },
+    { id: 'prescription', step: 'Clinical', name: 'Prescription', cap: 'Checked and explained',
+      kicker: 'The record · Prescription', title: 'Checked, explained, <em>and on the patient’s phone.</em>',
+      marks: [
+        { n: 1, t: 'The allergy rides along', d: 'The severe penicillin allergy is printed on the prescription itself.', sel: '#sc-prescription', txt: 'Penicillin', x: 0, y: .5, dx: -14 },
+        { n: 2, t: 'Interactions checked for the doctor', d: 'No interactions for this pair, plus a grapefruit note the patient was counselled on.', sel: '#sc-prescription', txt: 'Drug Interaction Check', x: 0, y: .5, dx: -14 },
+        { n: 3, t: 'Instructions written for the patient', d: 'When to take it, with or without food, and what to do after a missed dose.', sel: '#sc-prescription .drug-inst-label', i: 0, x: 0, y: .5, dx: -14 },
+        { n: 4, t: 'Changes are labelled', d: 'Dose increased from 5mg, with refills counted.', sel: '#sc-prescription', txt: 'Dose increased from 5mg', x: 0, y: .5, dx: -14 },
+        { n: 5, t: 'Sent to the patient’s app', d: 'A QR code any registered pharmacy can dispense from.', sel: '#sc-prescription', txt: 'QR code sent to patient app', x: 0, y: .5, dx: -14 }
+      ] },
+    { id: 'patient', step: 'Plain language', name: 'Patient app', cap: 'Nine screens, for the patient', call: ['showPhone', 2],
+      kicker: 'For the patient · Patient app', title: 'Reminders that <em>set themselves.</em>',
+      marks: [
+        { n: 1, t: 'Timed from the prescription', d: '"Once daily, morning" becomes 8:00 AM daily, with the reminder already set.', sel: '#ph-2', txt: '8:00 AM daily', x: 0, y: .5, dx: -14 },
+        { n: 2, t: 'Dose changes, in plain words', d: 'Amlodipine went up to 10mg today, and the app says so.', sel: '#ph-2', txt: 'Amlodipine increased to 10mg', x: 0, y: .5, dx: -14 },
+        { n: 3, t: 'Updated on its own', d: '"Your reminders have been updated." Nine screens in all: use the tabs above the phone to see the rest.', sel: '#ph-2', txt: 'reminders have been updated', x: 1, y: .5, dx: 14 }
+      ] }
+  ]
+};
 </script>
-
-
-<!-- ══════ CASE STUDY ══════ -->
-<div id="sc-casestudy" class="screen">
-<div class="cs-page">
-
-  <div class="cs-cover">
-    <div class="cs-eyebrow">Healthcare UX · Capgemini Internal</div>
-    <div class="cs-h1">A tool that listens so<br><em>doctors don't have to type</em></div>
-    <div class="cs-meta">
-      <div class="cs-mc"><div class="cs-ml">Client</div><div class="cs-mv">Capgemini (Internal)</div></div>
-      <div class="cs-mc"><div class="cs-ml">Sector</div><div class="cs-mv">Healthcare Tech</div></div>
-      <div class="cs-mc"><div class="cs-ml">My Role</div><div class="cs-mv">UX Designer</div></div>
-      <div class="cs-mc"><div class="cs-ml">Users</div><div class="cs-mv">Doctors + Patients</div></div>
-      <div class="cs-mc"><div class="cs-ml">Output</div><div class="cs-mv">Hi-fi prototypes + handoff</div></div>
-    </div>
-  </div>
-
-  <section class="cv" aria-label="MediScribe walkthrough video"><video controls playsinline preload="metadata" poster="../thumbnails/mediscribe-cover.jpg"><source src="../videos/mediscribe.mp4" type="video/mp4"></video><p class="cv-cap"><span>Walkthrough</span><span>1:44</span></p></section>
-<div class="cs-block">
-    <div class="cs-sl">01 — The brief</div>
-    <div class="cs-h2">Give doctors back the half of the appointment they lose to a keyboard</div>
-    <p class="cs-p">Capgemini ran an internal health clinic, and the brief came out of one observation: in a ten-minute consultation, the doctor spends half of it typing instead of listening. My job was to fix that — for the doctor, and for the patient on the other side of the desk.</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">02 — Discovery</div>
-    <div class="cs-h2">I spent a morning watching real consultations before I drew anything</div>
-    <p class="cs-p">The pattern repeated every visit. The doctor asks a question, the patient answers, and instead of thinking the doctor is typing — then hunting for a past prescription, then checking a drug interaction, then trying to recall what was said two minutes ago while doing all of it.</p>
-    <p class="cs-p">By the end, a chunk of the appointment has gone to paperwork, and the patient walks out remembering maybe half of what happened. That handed me three problems to design for, not one.</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">03 — Who it was for</div>
-    <div class="cs-h2">Same data, three very different people</div>
-    <p class="cs-p"><strong>The doctor.</strong> Put a screen in front of them mid-consultation and they'll look at it — they can't help it. The interface had to earn its place in the room without pulling their eyes off the patient.</p>
-    <p class="cs-p"><strong>The patient.</strong> They leave having absorbed half of what was said, lose the paper script, forget the dose. They needed the visit handed back in plain language, with medication reminders that set themselves — because nobody configures a reminder schedule after a GP appointment.</p>
-    <p class="cs-p"><strong>The next specialist.</strong> They meet the patient cold and rebuild the history from memory — usually getting bits of it wrong. They needed the whole record in front of them, without a phone call to the GP's office.</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">04 — Principles</div>
-    <div class="cs-h2">Three rules I designed against</div>
-    <p class="cs-p">The consultation screen has to stay invisible. The patient app can't read like a medical record. And trust is the feature — a doctor won't sign their name to something they don't believe.</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">05 — Process</div>
-    <div class="cs-h2">Most of the work was deciding what to take out</div>
-    <p class="cs-p">The live-consultation screen took the most rounds. The first version put the transcript front and centre, buttons on the AI suggestions, playback controls — comprehensive, and exactly the kind of thing a doctor minimises and never reopens. So we cut: the flag-a-line control, the accept-suggestion button, anything that asked for a tap. Every removal made it better. The rule we landed on — <em>if the doctor has to touch this screen mid-consultation, something has gone wrong.</em></p>
-    <p class="cs-p">Trust took the longest. Doctors reviewing the auto-generated summary would catch a single wrong line and stop believing the whole thing. That's where the confidence scoring, the obvious edit affordances, and the section-by-section review came from — the line between "the app did the work for you" and "you're still in control of the record."</p>
-    <p class="cs-p">The patient app was rewritten line by line with the clinical team, so "your blood pressure is getting better" never drifted away from "I10 — essential hypertension, controlled."</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">06 — The solution</div>
-    <div class="cs-h2">Five screens, one source of truth</div>
-    <p class="cs-p">The same record powers everything — captured passively in the room, reviewed by the doctor, then shown two ways: the clinical version for anyone treating the patient, and a plain-language version for the patient themselves. The full set is interactive — open each one from the nav at the top, or jump in here:</p>
-    <div class="cs-screens-links">
-      <button onclick="go('consult')">▸ Live Consultation</button>
-      <button onclick="go('summary')">▸ Visit Summary</button>
-      <button onclick="go('history')">▸ Patient History</button>
-      <button onclick="go('prescription')">▸ Prescription</button>
-      <button onclick="go('patient')">▸ Patient App</button>
-    </div>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">07 — Validation</div>
-    <div class="cs-h2">It went back to the people it was for</div>
-    <p class="cs-p">Doctors tested the prototypes. The sharpest signal was the summary-trust problem — one error collapsing confidence in the whole record — and the review flow exists because of how hard they pushed on it.</p>
-  </div>
-
-  <div class="cs-div"></div>
-
-  <div class="cs-block">
-    <div class="cs-sl">08 — Reflection</div>
-    <div class="cs-h2">What I'd keep, and what I'd change</div>
-    <p class="cs-p"><strong>Keep:</strong> the passive consultation screen. Every push to make it interactive got resisted, and that restraint is what made it work — the consultation is between the doctor and the patient, and the app's job is to record it, not join in.</p>
-    <p class="cs-p"><strong>Change:</strong> consent got squeezed to the end of the timeline. In healthcare that belongs at the start, not as a finishing touch — if I did this again I'd design the "who sees what" flow first.</p>
-    <p class="cs-p">And I didn't set success metrics going in. "Positive feedback" isn't a measurement. Next time I'd agree on what good looks like before building — time to finalise a record, corrections per generated summary, patients opening the app within 24 hours of a visit.</p>
-
-    <div class="cs-insights">
-      <div class="cs-insight">
-        <h4>Designing for two users means accepting they want opposite things.</h4>
-        <p>The doctor wants less to look at; the patient wants more explained. Same data, opposite jobs. The trap would have been forcing them into one interface.</p>
-      </div>
-      <div class="cs-insight">
-        <h4>In healthcare, a tool earns trust before it gets to help.</h4>
-        <p>One wrong code in a generated summary and a doctor is done with the whole system. Confidence scoring and the review state weren't polish — they were the price of being used at all.</p>
-      </div>
-      <div class="cs-insight">
-        <h4>Plain language is more work, not less.</h4>
-        <p>"Hypertension, controlled" is two words. Saying it so a patient actually understands takes someone who knows both the medicine and the person reading it.</p>
-      </div>
-      <div class="cs-insight">
-        <h4>A screen that asks for nothing is still doing its job.</h4>
-        <p>The consultation interface needed zero interaction during the session. Being present without demanding attention was the entire point.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-</div><!-- page-wrap -->
-
-<script>
-// A stray </div> inside one of the embedded mockups closes #sc-casestudy/.cs-page
-// early, so the later writeup blocks escape into .page-wrap — rendering full-width
-// AND showing on every tab. Re-attach those blocks back into the writeup column.
-(function fixStructure(){
-  const pw = document.querySelector('.page-wrap');
-  if (!pw) return;
-  // An unclosed tag in one of the app mockups nests later screens inside earlier
-  // ones, so the tab switcher hides them. Lift every screen back to page-wrap level.
-  document.querySelectorAll('.screen').forEach(s => { if (s.parentElement !== pw) pw.appendChild(s); });
-  // And move any writeup block that escaped its column back into .cs-page.
-  const screen = document.getElementById('sc-casestudy');
-  const page = screen && screen.querySelector('.cs-page');
-  if (page) document.querySelectorAll('.cs-cover, .cs-block, .cs-div, .scr-pv, .scr-cap')
-    .forEach(el => { if (!screen.contains(el)) page.appendChild(el); });
-})();
-
-function go(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
-  document.getElementById('sc-' + name).classList.add('visible');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const map = {consult:0,summary:1,history:2,prescription:3,patient:4,casestudy:5};
-  if (map[name] !== undefined) document.querySelectorAll('.nav-btn')[map[name]].classList.add('active');
-  window.scrollTo(0,0);
-}
-// On phones, lead with the written case study (moments-style). The interactive
-// app demo stays one tap away in the nav. Desktop default is unchanged.
-try { if (window.matchMedia && matchMedia('(max-width: 640px)').matches) go('casestudy'); } catch (e) {}
-</script>
-<script>if(location.hash==='#casestudy'){try{go('casestudy')}catch(e){}}</script>
+<script src="cs.js"></script>
 </body>
 </html>
