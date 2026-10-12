@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baker Hughes — UX Case Study & Prototypes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bh-red: #C8102E; --bh-red-dark: #A00D25; --bh-red-lt: #FDF0F2;
+  --bh-navy: #1A1A2E; --white: #FFFFFF; --surface: #F8F8F8; --surface2: #F2F2F2;
+  --border: #E4E4E4; --border2: #D0D0D0; --heading: #111111; --body: #3D3D3D;
+  --muted: #888888; --success: #1E7D34; --success-lt: #E8F5EB;
+  --warning: #B45309; --warning-lt: #FEF3C7; --error: #C8102E; --error-lt: #FDF0F2;
+  --info: #1D4ED8; --info-lt: #EFF6FF;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: #F0F0F0; color: var(--body); }
+
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: var(--bh-navy); height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; border-bottom: 2px solid var(--bh-red);
+}
+.top-nav-logo { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo-mark { width: 28px; height: 28px; background: var(--bh-red); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; }
+.top-nav-brand { font-size: 13px; font-weight: 700; color: white; }
+.top-nav-brand span { color: rgba(255,255,255,0.4); }
+.top-nav-links { display: flex; gap: 2px; }
+.nav-btn { padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; }
+.nav-btn:hover { color: white; background: rgba(255,255,255,0.08); }
+.nav-btn.active { color: white; background: var(--bh-red); }
+.nav-btn.cs-btn { border-left: 1px solid rgba(255,255,255,0.1); margin-left: 6px; padding-left: 14px; color: rgba(255,255,255,0.7); }
+
+.page-wrap { margin-top: 52px; }
+.content-section { display: none; }
+.content-section.visible { display: block; }
+
+/* APP SHELL */
+.app-shell { display: flex; height: calc(100vh - 52px); }
+.sidebar { width: 216px; flex-shrink: 0; background: var(--bh-navy); display: flex; flex-direction: column; overflow-y: auto; }
+.sidebar-section { padding: 18px 0 6px; }
+.sidebar-label { padding: 0 18px 5px; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; }
+.sb-item { display: flex; align-items: center; gap: 9px; padding: 8px 18px; font-size: 12px; color: rgba(255,255,255,0.5); cursor: pointer; border-left: 2px solid transparent; transition: all 0.15s; }
+.sb-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+.sb-item.active { color: white; background: rgba(200,16,46,0.15); border-left-color: var(--bh-red); }
+.sb-badge { margin-left: auto; background: var(--bh-red); color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+.sb-badge.warn { background: var(--warning); }
+.sb-user { margin-top: auto; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 9px; }
+.sb-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--bh-red); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+.sb-name { font-size: 12px; font-weight: 600; color: white; }
+.sb-role { font-size: 10px; color: rgba(255,255,255,0.35); }
+
+.main { flex: 1; overflow-y: auto; padding: 24px 28px; }
+.pg-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.pg-title { font-size: 20px; font-weight: 700; color: var(--heading); margin-bottom: 2px; }
+.pg-sub { font-size: 12px; color: var(--muted); }
+.header-btns { display: flex; gap: 8px; }
+
+.btn { display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 14px; border-radius: 4px; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; border: none; }
+.btn-primary { background: var(--bh-red); color: white; }
+.btn-secondary { background: white; color: var(--heading); border: 1px solid var(--border2); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 11px; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.kpi { background: white; border-radius: 7px; padding: 18px; border: 1px solid var(--border); }
+.kpi-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.kpi-val { font-size: 26px; font-weight: 700; color: var(--heading); margin-bottom: 4px; }
+.kpi-delta { font-size: 11px; }
+.kpi-delta.up { color: var(--success); }
+.kpi-delta.dn { color: var(--error); }
+.kpi-delta.nt { color: var(--muted); }
+.kpi-bar { height: 3px; border-radius: 2px; margin-top: 10px; }
+
+/* FILTER BAR */
+.filter-bar { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; display: flex; gap: 8px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+.fb-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 14px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--body); }
+.chip.active { background: var(--bh-red); color: white; border-color: var(--bh-red); }
+.fb-div { width: 1px; height: 20px; background: var(--border); }
+.search-box { margin-left: auto; position: relative; }
+.search-in { height: 28px; padding: 0 8px 0 26px; border-radius: 4px; border: 1px solid var(--border); font-size: 11px; font-family: 'Inter',sans-serif; width: 190px; background: var(--surface); }
+.search-ico { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--muted); }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 3px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.b-ok  { background: var(--success-lt); color: var(--success); }
+.b-att { background: var(--warning-lt); color: var(--warning); }
+.b-crit{ background: var(--error-lt);   color: var(--error); }
+.b-pend{ background: var(--info-lt);    color: var(--info); }
+.b-comp{ background: var(--success-lt); color: var(--success); }
+
+/* ASSET CARDS */
+.asset-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.asset-card { background: white; border-radius: 7px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: all 0.18s; }
+.asset-card:hover { border-color: var(--bh-red); box-shadow: 0 3px 14px rgba(200,16,46,0.1); transform: translateY(-1px); }
+.ac-head { padding: 12px 14px 8px; display: flex; justify-content: space-between; align-items: flex-start; }
+.ac-id { font-size: 9px; font-weight: 600; color: var(--muted); font-family: monospace; margin-bottom: 3px; }
+.ac-name { font-size: 13px; font-weight: 600; color: var(--heading); margin-bottom: 1px; }
+.ac-sub { font-size: 11px; color: var(--muted); }
+.ac-body { padding: 0 14px 12px; }
+.ac-meta { display: flex; gap: 14px; margin-top: 8px; }
+.ac-ml { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.ac-mv { font-size: 11px; font-weight: 600; color: var(--heading); margin-top: 1px; }
+.ac-prog { height: 3px; background: var(--border); border-radius: 2px; margin-top: 7px; overflow: hidden; }
+.ac-fill { height: 100%; border-radius: 2px; }
+.ac-foot { padding: 8px 14px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.ac-foot-txt { font-size: 10px; color: var(--muted); }
+
+/* TABLE */
+.table-wrap { background: white; border-radius: 7px; border: 1px solid var(--border); overflow: hidden; }
+.tbl-hdr { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.tbl-hdr-title { font-size: 14px; font-weight: 700; color: var(--heading); }
+.tbl-hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th { padding: 9px 14px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: #FAFAFA; }
+.data-table tbody tr.sel { background: var(--bh-red-lt); }
+.data-table td { padding: 10px 14px; font-size: 12px; color: var(--body); vertical-align: middle; }
+.td-mono { font-family: monospace; font-size: 11px; color: var(--muted); }
+.td-link { color: var(--bh-red); font-weight: 500; }
+.hbar { width: 72px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.hfill { height: 100%; border-radius: 3px; }
+.tbl-foot { padding: 10px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); }
+.tbl-foot-info { font-size: 11px; color: var(--muted); }
+.pager { display: flex; gap: 3px; }
+.pg-btn { width: 26px; height: 26px; border-radius: 3px; border: 1px solid var(--border); background: white; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--body); }
+.pg-btn.active { background: var(--bh-red); color: white; border-color: var(--bh-red); }
+
+/* FORM */
+.form-layout { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+.form-card { background: white; border-radius: 7px; border: 1px solid var(--border); }
+.fc-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.fc-title { font-size: 14px; font-weight: 700; color: var(--heading); }
+.fc-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.fc-body { padding: 20px; }
+.form-sec { margin-bottom: 24px; }
+.form-sec:last-child { margin-bottom: 0; }
+.form-sec-title { font-size: 10px; font-weight: 700; color: var(--heading); text-transform: uppercase; letter-spacing: 0.07em; padding-bottom: 9px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.form-grid { display: grid; gap: 14px; }
+.form-grid-2 { grid-template-columns: 1fr 1fr; }
+.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--body); }
+.required { color: var(--bh-red); }
+.form-input, .form-select, .form-textarea { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--heading); border: 1px solid var(--border2); border-radius: 4px; background: white; }
+.form-input, .form-select { height: 34px; padding: 0 9px; }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; }
+.form-textarea { padding: 7px 9px; resize: vertical; min-height: 68px; width: 100%; }
+.form-input.err { border-color: var(--bh-red); background: var(--bh-red-lt); }
+.form-hint { font-size: 10px; color: var(--muted); }
+.form-err { font-size: 10px; color: var(--bh-red); }
+.fc-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); border-radius: 0 0 7px 7px; }
+.fc-foot-note { font-size: 11px; color: var(--muted); }
+
+/* Validation banner */
+.val-banner { background: var(--error-lt); border: 1px solid rgba(200,16,46,0.2); border-radius: 5px; padding: 10px 14px; margin-bottom: 14px; display: flex; gap: 9px; }
+.val-icon { color: var(--bh-red); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.val-title { font-size: 12px; font-weight: 600; color: var(--bh-red); margin-bottom: 3px; }
+.val-list { font-size: 11px; color: var(--body); padding-left: 13px; }
+.val-list li { margin-bottom: 1px; }
+
+/* Form sidebar */
+.fsidebar { display: flex; flex-direction: column; gap: 14px; }
+.sc { background: white; border-radius: 7px; border: 1px solid var(--border); }
+.sc-head { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--heading); }
+.sc-body { padding: 14px; }
+.prog-steps { display: flex; flex-direction: column; }
+.ps { display: flex; gap: 9px; }
+.ps-left { display: flex; flex-direction: column; align-items: center; }
+.ps-dot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.ps-dot.done { background: var(--success); color: white; }
+.ps-dot.act  { background: var(--bh-red);  color: white; }
+.ps-dot.todo { background: white; border: 1.5px solid var(--border2); color: var(--muted); }
+.ps-line { width: 2px; flex: 1; min-height: 18px; background: var(--border); margin: 2px 0; }
+.ps-line.done { background: var(--success); }
+.ps-content { padding-bottom: 14px; }
+.ps-lbl { font-size: 11px; padding-top: 2px; }
+.ps-lbl.done { color: var(--body); }
+.ps-lbl.act  { color: var(--bh-red); font-weight: 600; }
+.ps-lbl.todo { color: var(--muted); }
+.info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; }
+.info-row:last-child { margin-bottom: 0; }
+.info-k { color: var(--muted); }
+.info-v { font-weight: 600; color: var(--heading); }
+
+/* Maintenance */
+.req-layout { display: grid; grid-template-columns: 1fr 284px; gap: 18px; }
+.priority-sel { display: flex; gap: 8px; }
+.pri-opt { flex: 1; padding: 9px; border-radius: 5px; border: 1.5px solid var(--border); cursor: pointer; text-align: center; }
+.pri-opt.sel.med { border-color: var(--warning); background: var(--warning-lt); }
+.pri-dot { width: 7px; height: 7px; border-radius: 50%; margin: 0 auto 5px; }
+.pri-lbl { font-size: 10px; font-weight: 600; }
+.attach-zone { border: 1.5px dashed var(--border2); border-radius: 5px; padding: 20px; text-align: center; cursor: pointer; }
+.attach-zone:hover { border-color: var(--bh-red); background: var(--bh-red-lt); }
+.attach-icon { font-size: 24px; margin-bottom: 6px; }
+.attach-txt { font-size: 12px; color: var(--muted); }
+.attach-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.attached-file { display: flex; gap: 8px; align-items: center; padding: 7px 10px; background: var(--surface); border-radius: 4px; border: 1px solid var(--border); font-size: 11px; margin-top: 6px; }
+.asset-ctx { background: var(--bh-navy); border-radius: 7px; padding: 16px; color: white; margin-bottom: 14px; }
+.ctx-lbl { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.ctx-id { font-size: 10px; font-family: monospace; color: rgba(255,255,255,0.45); margin-bottom: 3px; }
+.ctx-name { font-size: 14px; font-weight: 700; color: white; margin-bottom: 8px; }
+.ctx-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.ctx-tag { font-size: 9px; padding: 2px 7px; background: rgba(255,255,255,0.1); border-radius: 3px; color: rgba(255,255,255,0.65); }
+.checklist { display: flex; flex-direction: column; gap: 6px; }
+.cl-item { display: flex; gap: 9px; align-items: flex-start; padding: 9px 10px; border-radius: 5px; border: 1px solid var(--border); font-size: 11px; color: var(--body); line-height: 1.45; }
+.cl-item.done { background: var(--success-lt); border-color: rgba(30,125,52,0.2); }
+.cl-box { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.cl-box.done { background: var(--success); color: white; font-size: 9px; font-weight: 700; }
+.cl-box.todo { border: 1.5px solid var(--border2); }
+
+/* SUCCESS */
+.success-screen { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 120px); padding: 32px; }
+.success-card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 48px 40px; max-width: 520px; width: 100%; text-align: center; }
+.suc-icon { width: 64px; height: 64px; background: var(--success-lt); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+.suc-title { font-size: 22px; font-weight: 700; color: var(--heading); margin-bottom: 10px; }
+.suc-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+.suc-ref { background: var(--surface); border-radius: 7px; padding: 14px; margin-bottom: 24px; }
+.suc-ref-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.suc-ref-id { font-size: 20px; font-weight: 700; color: var(--heading); font-family: monospace; }
+.suc-details { text-align: left; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin-bottom: 24px; }
+.suc-row { display: flex; justify-content: space-between; padding: 9px 14px; font-size: 12px; border-bottom: 1px solid var(--border); }
+.suc-row:last-child { border-bottom: none; }
+.suc-k { color: var(--muted); }
+.suc-v { font-weight: 600; color: var(--heading); }
+.suc-actions { display: flex; gap: 10px; justify-content: center; }
+.next-steps { background: var(--surface); border-radius: 7px; padding: 14px; margin-top: 20px; text-align: left; }
+.ns-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--heading); margin-bottom: 9px; }
+.ns-item { display: flex; gap: 9px; align-items: flex-start; margin-bottom: 7px; font-size: 11px; color: var(--body); }
+.ns-item:last-child { margin-bottom: 0; }
+.ns-num { width: 16px; height: 16px; background: var(--bh-red); color: white; border-radius: 50%; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+/* CASE STUDY */
+.cs-wrap { max-width: 860px; margin: 0 auto; padding: 44px 36px; background: var(--surface); min-height: calc(100vh - 52px); }
+.cs-hero { background: var(--bh-navy); border-radius: 14px; padding: 48px; margin-bottom: 56px; color: white; position: relative; overflow: hidden; }
+.cs-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:260px; height:260px; background:var(--bh-red); opacity:0.07; border-radius:50%; }
+.cs-eyebrow { font-size: 10px; font-weight: 700; color: var(--bh-red); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.cs-eyebrow::before { content:''; width:20px; height:2px; background:var(--bh-red); }
+.cs-hero-title { font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
+.cs-hero-title em { font-family: 'DM Serif Display', serif; font-weight: 400; font-style: italic; }
+.cs-hero-sub { font-size: 15px; color: rgba(255,255,255,0.58); line-height: 1.65; max-width: 500px; margin-bottom: 36px; }
+.cs-meta-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; overflow: hidden; width: fit-content; }
+.cs-mi { padding: 12px 20px; border-right: 1px solid rgba(255,255,255,0.12); }
+.cs-mi:last-child { border-right: none; }
+.cs-ml { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+.cs-mv { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.82); }
+
+.cs-sec { margin-bottom: 56px; }
+.cs-num { font-size: 10px; font-weight: 700; color: var(--bh-red); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+.cs-sec h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--heading); margin-bottom: 14px; }
+.cs-sec h2 em { font-family: 'DM Serif Display', serif; font-weight: 400; font-style: italic; color: var(--bh-red); }
+.cs-intro { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 600px; margin-bottom: 36px; }
+.prose { font-size: 14px; color: var(--body); line-height: 1.75; margin-bottom: 14px; max-width: 640px; }
+
+.role-banner { background: var(--bh-navy); border-radius: 10px; padding: 28px 36px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin-bottom: 36px; }
+.rb-lbl { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+.rb-val { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.4; }
+
+.prob-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 36px; }
+.prob-card { padding: 22px; border: 1px solid var(--border); border-radius: 9px; background: white; border-top: 3px solid var(--bh-red); }
+.prob-num { font-size: 38px; font-weight: 800; color: var(--border); line-height: 1; margin-bottom: 9px; letter-spacing: -0.04em; }
+.prob-card h4 { font-size: 13px; font-weight: 700; color: var(--heading); margin-bottom: 7px; }
+.prob-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+.proc-list { display: flex; flex-direction: column; gap: 0; margin: 28px 0; }
+.proc-item { display: grid; grid-template-columns: 44px 1fr; gap: 18px; }
+.proc-left { display: flex; flex-direction: column; align-items: center; }
+.proc-dot { width: 44px; height: 44px; border-radius: 50%; background: var(--bh-navy); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.proc-line { width: 2px; flex: 1; background: var(--border); margin: 3px 0; min-height: 20px; }
+.proc-item:last-child .proc-line { display: none; }
+.proc-content { padding: 8px 0 32px; }
+.proc-tag { display: inline-block; font-size: 9px; font-weight: 700; background: var(--bh-red-lt); color: var(--bh-red); padding: 2px 9px; border-radius: 20px; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.06em; }
+.proc-content h4 { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 5px; }
+.proc-content p { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 520px; }
+
+.dec-list { display: flex; flex-direction: column; gap: 14px; margin: 28px 0; }
+.dec-card { display: grid; grid-template-columns: 40px 1fr; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 9px; background: white; }
+.dec-icon { width: 40px; height: 40px; background: var(--surface2); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.dec-tag { font-size: 9px; font-weight: 700; color: var(--bh-red); background: var(--bh-red-lt); padding: 2px 7px; border-radius: 20px; margin-bottom: 5px; display: inline-block; text-transform: uppercase; letter-spacing: 0.06em; }
+.dec-card h4 { font-size: 14px; font-weight: 700; color: var(--heading); margin-bottom: 5px; }
+.dec-card p { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 28px 0; }
+.ba-card { border-radius: 9px; overflow: hidden; border: 1px solid var(--border); }
+.ba-head { padding: 12px 18px; display: flex; align-items: center; gap: 7px; }
+.ba-head.bef { background: var(--error-lt); }
+.ba-head.aft { background: var(--success-lt); }
+.ba-dot { width: 7px; height: 7px; border-radius: 50%; }
+.ba-head.bef .ba-dot { background: var(--error); }
+.ba-head.aft .ba-dot { background: var(--success); }
+.ba-htitle { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+.ba-head.bef .ba-htitle { color: var(--error); }
+.ba-head.aft .ba-htitle { color: var(--success); }
+.ba-body { padding: 18px; background: white; }
+.ba-item { display: flex; gap: 9px; margin-bottom: 10px; font-size: 12px; color: var(--body); line-height: 1.45; }
+.ba-item:last-child { margin-bottom: 0; }
+
+.contrib { background: var(--bh-navy); border-radius: 10px; padding: 36px; margin: 28px 0; }
+.contrib-ey { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.contrib-q { font-size: 20px; font-family: 'DM Serif Display', serif; font-style: italic; color: white; line-height: 1.5; margin-bottom: 24px; }
+.contrib-items { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+.ci-lbl { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.32); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.ci-val { font-size: 12px; color: rgba(255,255,255,0.78); line-height: 1.45; }
+
+.refl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 28px 0; }
+.refl-card { padding: 22px; border-radius: 9px; border: 1px solid var(--border); background: white; }
+.refl-card h4 { font-size: 13px; font-weight: 700; color: var(--heading); margin-bottom: 7px; }
+.refl-card p { font-size: 12px; color: var(--muted); line-height: 1.65; }
+</style>
+<style id="cv-style">
+.cv{margin:0 auto 48px;max-width:760px;box-sizing:border-box}
+.cv video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6)}
+.cv-cap{display:flex;justify-content:space-between;gap:12px;margin:10px 2px 0;font:500 12px/1.4 'Martian Mono',ui-monospace,Menlo,monospace;letter-spacing:.02em;opacity:.7}
+.cs-back{display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border-radius:50%;border:1px solid currentColor;color:inherit;text-decoration:none;opacity:.75;transition:opacity .2s,background-color .2s;margin-right:10px}
+.cs-back:hover{opacity:1;background:rgba(127,127,127,.15)}
+.cs-back svg{width:16px;height:16px}
+.top-nav .cs-back{color:#EDEDEA}
+@media (max-width:640px){.cv{margin-bottom:32px}}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-logo"><a class="cs-back" href="../index.html" aria-label="Back to all work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="top-nav-logo-mark">BH</div>
+    <div class="top-nav-brand">Baker Hughes <span>·</span> Asset Management Portal</div>
+  </div>
+  <div class="top-nav-links">
+    <button class="nav-btn active" onclick="show('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="show('inventory')">Inventory</button>
+    <button class="nav-btn" onclick="show('register')">Register Asset</button>
+    <button class="nav-btn" onclick="show('maintenance')">Maintenance Request</button>
+    <button class="nav-btn" onclick="show('success')">Confirmation</button>
+    <button class="nav-btn cs-btn" onclick="show('casestudy')">📋 Case Study</button>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+<!-- ══════ SCREEN 1: DASHBOARD ══════ -->
+<div id="s-dashboard" class="content-section visible">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sb-item active">⊞ Dashboard</div>
+        <div class="sb-item" onclick="show('inventory')">☰ Inventory <span class="sb-badge">248</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Asset Management</div>
+        <div class="sb-item" onclick="show('register')">+ Register Asset</div>
+        <div class="sb-item" onclick="show('maintenance')">⚙ Maintenance <span class="sb-badge warn">3</span></div>
+        <div class="sb-item">★ Inspections</div>
+        <div class="sb-item">📄 Reports</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">System</div>
+        <div class="sb-item">⚙ Settings</div>
+      </div>
+      <div class="sb-user">
+        <div class="sb-avatar">JR</div>
+        <div><div class="sb-name">J. Rodriguez</div><div class="sb-role">Field Engineer III</div></div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="pg-header">
+        <div><div class="pg-title">Asset Overview</div><div class="pg-sub">Gulf of Mexico Region · Updated 14 min ago</div></div>
+        <div class="header-btns">
+          <button class="btn btn-secondary btn-sm">⬇ Export</button>
+          <button class="btn btn-primary btn-sm" onclick="show('register')">+ Register Asset</button>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-lbl">Total Assets</div><div class="kpi-val">248</div><div class="kpi-delta up">↑ 12 this month</div><div class="kpi-bar" style="background:var(--bh-red)"></div></div>
+        <div class="kpi"><div class="kpi-lbl">Operational</div><div class="kpi-val" style="color:var(--success)">189</div><div class="kpi-delta nt">76.2% of total</div><div class="kpi-bar" style="background:var(--success)"></div></div>
+        <div class="kpi"><div class="kpi-lbl">Needs Attention</div><div class="kpi-val" style="color:var(--warning)">41</div><div class="kpi-delta dn">↑ 5 this week</div><div class="kpi-bar" style="background:var(--warning)"></div></div>
+        <div class="kpi"><div class="kpi-lbl">Critical / Offline</div><div class="kpi-val" style="color:var(--error)">18</div><div class="kpi-delta dn">↑ 2 in last 24h</div><div class="kpi-bar" style="background:var(--bh-red)"></div></div>
+      </div>
+      <div class="filter-bar">
+        <span class="fb-label">Status:</span>
+        <button class="chip active">All (248)</button>
+        <button class="chip">Operational (189)</button>
+        <button class="chip">Attention (41)</button>
+        <button class="chip">Critical (18)</button>
+        <div class="fb-div"></div>
+        <span class="fb-label">Type:</span>
+        <button class="chip">Drilling</button>
+        <button class="chip">Turbomachinery</button>
+        <button class="chip">Sensors</button>
+        <div class="search-box"><span class="search-ico">🔍</span><input class="search-in" placeholder="Search assets..."></div>
+      </div>
+      <div class="asset-grid">
+        <div class="asset-card" onclick="show('maintenance')">
+          <div class="ac-head"><div><div class="ac-id">BH-DRL-2024-0041</div><div class="ac-name">TRU-Steer Rotary Steerable</div><div class="ac-sub">Directional Drilling · Platform A</div></div><span class="badge b-ok">Operational</span></div>
+          <div class="ac-body"><div class="ac-meta"><div><div class="ac-ml">Health</div><div class="ac-mv" style="color:var(--success)">94%</div></div><div><div class="ac-ml">Last Service</div><div class="ac-mv">12 days ago</div></div><div><div class="ac-ml">Run Hours</div><div class="ac-mv">1,240 h</div></div></div><div class="ac-prog"><div class="ac-fill" style="width:94%;background:var(--success)"></div></div></div>
+          <div class="ac-foot"><span class="ac-foot-txt">Next maintenance: 18 days</span><button class="btn btn-ghost btn-sm">View →</button></div>
+        </div>
+        <div class="asset-card" onclick="show('maintenance')">
+          <div class="ac-head"><div><div class="ac-id">BH-TRB-2023-0118</div><div class="ac-name">NovaLT16 Gas Turbine</div><div class="ac-sub">Turbomachinery · Compression Train B</div></div><span class="badge b-att">Attention</span></div>
+          <div class="ac-body"><div class="ac-meta"><div><div class="ac-ml">Health</div><div class="ac-mv" style="color:var(--warning)">61%</div></div><div><div class="ac-ml">Last Service</div><div class="ac-mv">47 days ago</div></div><div><div class="ac-ml">Run Hours</div><div class="ac-mv">8,902 h</div></div></div><div class="ac-prog"><div class="ac-fill" style="width:61%;background:var(--warning)"></div></div></div>
+          <div class="ac-foot"><span class="ac-foot-txt" style="color:var(--warning)">⚠ Vibration anomaly detected</span><button class="btn btn-ghost btn-sm">View →</button></div>
+        </div>
+        <div class="asset-card">
+          <div class="ac-head"><div><div class="ac-id">BH-SNS-2024-0209</div><div class="ac-name">Bently Nevada 3500/42M</div><div class="ac-sub">Proximity Sensors · Turbine Array</div></div><span class="badge b-crit">Critical</span></div>
+          <div class="ac-body"><div class="ac-meta"><div><div class="ac-ml">Health</div><div class="ac-mv" style="color:var(--error)">23%</div></div><div><div class="ac-ml">Last Service</div><div class="ac-mv">91 days ago</div></div><div><div class="ac-ml">Run Hours</div><div class="ac-mv">14,310 h</div></div></div><div class="ac-prog"><div class="ac-fill" style="width:23%;background:var(--error)"></div></div></div>
+          <div class="ac-foot"><span class="ac-foot-txt" style="color:var(--error)">🔴 Offline — replacement needed</span><button class="btn btn-primary btn-sm" onclick="show('maintenance')">Request →</button></div>
+        </div>
+        <div class="asset-card">
+          <div class="ac-head"><div><div class="ac-id">BH-CMP-2023-0055</div><div class="ac-name">BCL Centrifugal Compressor</div><div class="ac-sub">Compression · Platform C Topsides</div></div><span class="badge b-ok">Operational</span></div>
+          <div class="ac-body"><div class="ac-meta"><div><div class="ac-ml">Health</div><div class="ac-mv" style="color:var(--success)">88%</div></div><div><div class="ac-ml">Last Service</div><div class="ac-mv">8 days ago</div></div><div><div class="ac-ml">Run Hours</div><div class="ac-mv">3,441 h</div></div></div><div class="ac-prog"><div class="ac-fill" style="width:88%;background:var(--success)"></div></div></div>
+          <div class="ac-foot"><span class="ac-foot-txt">Next maintenance: 22 days</span><button class="btn btn-ghost btn-sm">View →</button></div>
+        </div>
+        <div class="asset-card">
+          <div class="ac-head"><div><div class="ac-id">BH-FLW-2024-0077</div><div class="ac-name">Panametrics DigitalFlow XGS868i</div><div class="ac-sub">Flow Meters · Pipeline Junction 4</div></div><span class="badge b-att">Attention</span></div>
+          <div class="ac-body"><div class="ac-meta"><div><div class="ac-ml">Health</div><div class="ac-mv" style="color:var(--warning)">72%</div></div><div><div class="ac-ml">Last Service</div><div class="ac-mv">33 days ago</div></div><div><div class="ac-ml">Run Hours</div><div class="ac-mv">5,820 h</div></div></div><div class="ac-prog"><div class="ac-fill" style="width:72%;background:var(--warning)"></div></div></div>
+          <div class="ac-foot"><span class="ac-foot-txt" style="color:var(--warning)">⚠ Calibration drift</span><button class="btn btn-ghost btn-sm">View →</button></div>
+        </div>
+        <div class="asset-card" onclick="show('inventory')" style="cursor:pointer">
+          <div class="ac-head"><div><div class="ac-id" style="color:var(--bh-red)">View all 248 assets →</div><div class="ac-name" style="color:var(--muted);font-weight:400;font-size:12px">Full inventory with filters, bulk actions, export</div></div></div>
+          <div class="ac-body" style="display:flex;align-items:center;justify-content:center;padding:16px 14px"><button class="btn btn-primary">Open Inventory Table →</button></div>
+          <div class="ac-foot"><span class="ac-foot-txt">Last updated: today, 09:41</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SCREEN 2: INVENTORY ══════ -->
+<div id="s-inventory" class="content-section">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sb-item" onclick="show('dashboard')">⊞ Dashboard</div>
+        <div class="sb-item active">☰ Inventory <span class="sb-badge">248</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Asset Management</div>
+        <div class="sb-item" onclick="show('register')">+ Register Asset</div>
+        <div class="sb-item" onclick="show('maintenance')">⚙ Maintenance <span class="sb-badge warn">3</span></div>
+        <div class="sb-item">📄 Reports</div>
+      </div>
+      <div class="sb-user"><div class="sb-avatar">JR</div><div><div class="sb-name">J. Rodriguez</div><div class="sb-role">Field Engineer III</div></div></div>
+    </div>
+    <div class="main">
+      <div class="pg-header">
+        <div><div class="pg-title">Asset Inventory</div><div class="pg-sub">248 assets across Gulf of Mexico Region</div></div>
+        <div class="header-btns">
+          <button class="btn btn-secondary btn-sm">⬇ Export CSV</button>
+          <button class="btn btn-secondary btn-sm">⚙ Columns</button>
+          <button class="btn btn-primary btn-sm" onclick="show('register')">+ Register Asset</button>
+        </div>
+      </div>
+      <div class="filter-bar" style="margin-bottom:14px">
+        <span class="fb-label">Filter:</span>
+        <button class="chip active">All</button>
+        <button class="chip">Operational</button>
+        <button class="chip">Attention</button>
+        <button class="chip">Critical</button>
+        <div class="fb-div"></div>
+        <button class="chip">Drilling</button>
+        <button class="chip">Turbomachinery</button>
+        <button class="chip">Sensors</button>
+        <div class="search-box"><span class="search-ico">🔍</span><input class="search-in" placeholder="Search by ID, name, location..." style="width:220px"></div>
+      </div>
+      <div class="table-wrap">
+        <div class="tbl-hdr">
+          <div><div class="tbl-hdr-title">All Assets</div><div class="tbl-hdr-sub">Showing 1–8 of 248 results</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm">⊞ Cards</button>
+            <button class="btn btn-secondary btn-sm">☰ Table</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th style="width:28px"><input type="checkbox"></th><th>Asset ID</th><th>Asset Name</th><th>Category</th><th>Location</th><th>Status</th><th>Health</th><th>Last Service</th><th>Next Due</th><th></th></tr></thead>
+          <tbody>
+            <tr onclick="show('maintenance')">
+              <td><input type="checkbox"></td><td class="td-mono">BH-DRL-2024-0041</td><td class="td-link">TRU-Steer Rotary Steerable</td><td>Drilling</td><td>Platform A · Deck 2</td><td><span class="badge b-ok">Operational</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:94%;background:var(--success)"></div></div><div style="font-size:10px;color:var(--success);margin-top:2px">94%</div></td><td>12 days ago</td><td>18 days</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+            <tr class="sel" onclick="show('maintenance')">
+              <td><input type="checkbox" checked></td><td class="td-mono">BH-TRB-2023-0118</td><td class="td-link">NovaLT16 Gas Turbine</td><td>Turbomachinery</td><td>Compression Train B</td><td><span class="badge b-att">Attention</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:61%;background:var(--warning)"></div></div><div style="font-size:10px;color:var(--warning);margin-top:2px">61%</div></td><td>47 days ago</td><td><span style="color:var(--warning);font-weight:600">Overdue</span></td><td><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();show('maintenance')">Request</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-SNS-2024-0209</td><td class="td-link">Bently Nevada 3500/42M</td><td>Sensors</td><td>Turbine Array · Row 3</td><td><span class="badge b-crit">Critical</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:23%;background:var(--error)"></div></div><div style="font-size:10px;color:var(--error);margin-top:2px">23%</div></td><td>91 days ago</td><td><span style="color:var(--error);font-weight:600">Critical</span></td><td><button class="btn btn-primary btn-sm" style="background:var(--error)" onclick="show('maintenance')">Urgent</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-CMP-2023-0055</td><td class="td-link">BCL Centrifugal Compressor</td><td>Compression</td><td>Platform C Topsides</td><td><span class="badge b-ok">Operational</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:88%;background:var(--success)"></div></div><div style="font-size:10px;color:var(--success);margin-top:2px">88%</div></td><td>8 days ago</td><td>22 days</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-FLW-2024-0077</td><td class="td-link">Panametrics DigitalFlow XGS868i</td><td>Flow Meters</td><td>Pipeline Junction 4</td><td><span class="badge b-att">Attention</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:72%;background:var(--warning)"></div></div><div style="font-size:10px;color:var(--warning);margin-top:2px">72%</div></td><td>33 days ago</td><td>7 days</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-PMP-2022-0031</td><td class="td-link">BB5 DDHF Centrifugal Pump</td><td>Pumps</td><td>Injection Platform B</td><td><span class="badge b-ok">Operational</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:81%;background:var(--success)"></div></div><div style="font-size:10px;color:var(--success);margin-top:2px">81%</div></td><td>5 days ago</td><td>25 days</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-VLV-2024-0144</td><td class="td-link">Masoneilan Control Valve</td><td>Valves</td><td>Processing Module 2</td><td><span class="badge b-pend">Pending</span></td>
+              <td><div class="hbar"></div><div style="font-size:10px;color:var(--muted);margin-top:2px">—</div></td><td>New</td><td>Commissioning</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td><td class="td-mono">BH-DRC-2023-0092</td><td class="td-link">Druck PTX 5072 Pressure Sensor</td><td>Sensors</td><td>Wellhead Array 7</td><td><span class="badge b-ok">Operational</span></td>
+              <td><div class="hbar"><div class="hfill" style="width:97%;background:var(--success)"></div></div><div style="font-size:10px;color:var(--success);margin-top:2px">97%</div></td><td>2 days ago</td><td>28 days</td><td><button class="btn btn-ghost btn-sm">···</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tbl-foot">
+          <div class="tbl-foot-info">Showing 1–8 of 248 · 1 selected</div>
+          <div class="pager">
+            <button class="pg-btn">‹</button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><span style="font-size:11px;color:var(--muted);padding:0 3px">…</span><button class="pg-btn">31</button><button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SCREEN 3: REGISTER ══════ -->
+<div id="s-register" class="content-section">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sb-item" onclick="show('dashboard')">⊞ Dashboard</div>
+        <div class="sb-item" onclick="show('inventory')">☰ Inventory <span class="sb-badge">248</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Asset Management</div>
+        <div class="sb-item active">+ Register Asset</div>
+        <div class="sb-item" onclick="show('maintenance')">⚙ Maintenance <span class="sb-badge warn">3</span></div>
+      </div>
+      <div class="sb-user"><div class="sb-avatar">JR</div><div><div class="sb-name">J. Rodriguez</div><div class="sb-role">Field Engineer III</div></div></div>
+    </div>
+    <div class="main">
+      <div class="pg-header">
+        <div><div class="pg-title">Register New Asset</div><div class="pg-sub">Add a new asset to the Gulf of Mexico inventory</div></div>
+        <div class="header-btns"><button class="btn btn-ghost btn-sm">Save Draft</button><button class="btn btn-secondary btn-sm" onclick="show('inventory')">Cancel</button></div>
+      </div>
+      <div class="form-layout">
+        <div>
+          <div class="val-banner">
+            <div class="val-icon">⚠</div>
+            <div><div class="val-title">2 required fields need attention</div><ul class="val-list"><li>Serial Number — cannot be blank for Class A assets</li><li>Commissioning Date — required for compliance tracking</li></ul></div>
+          </div>
+          <div class="form-card">
+            <div class="fc-head"><div><div class="fc-title">Asset Identification</div><div class="fc-sub">Basic identification and classification</div></div><span class="badge b-pend">Step 1 of 3</span></div>
+            <div class="fc-body">
+              <div class="form-sec">
+                <div class="form-sec-title">Classification</div>
+                <div class="form-grid form-grid-3">
+                  <div class="form-group"><label class="form-label">Category <span class="required">*</span></label><select class="form-select"><option selected>Turbomachinery</option><option>Drilling</option><option>Sensors</option></select></div>
+                  <div class="form-group"><label class="form-label">Product Line <span class="required">*</span></label><select class="form-select"><option selected>Oilfield Services</option><option>TPS</option></select></div>
+                  <div class="form-group"><label class="form-label">Asset Class <span class="required">*</span></label><select class="form-select"><option selected>Critical — Class A</option><option>Standard — Class B</option></select></div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Asset Details</div>
+                <div class="form-grid form-grid-2">
+                  <div class="form-group"><label class="form-label">Asset Name <span class="required">*</span></label><input class="form-input" value="NovaLT16 Gas Turbine"></div>
+                  <div class="form-group"><label class="form-label">Model No. <span class="required">*</span></label><input class="form-input" value="NLT16-GOM-2024"></div>
+                  <div class="form-group"><label class="form-label">Serial Number <span class="required">*</span></label><input class="form-input err" placeholder="e.g. BH-SN-24-004412"><span class="form-err">⚠ Required for Class A assets</span></div>
+                  <div class="form-group"><label class="form-label">Manufacturer Part No.</label><input class="form-input" value="GE-NLT16-0042"><span class="form-hint">Optional</span></div>
+                  <div class="form-group"><label class="form-label">Manufacture Date <span class="required">*</span></label><input class="form-input" type="date" value="2023-06-14"></div>
+                  <div class="form-group"><label class="form-label">Commissioning Date <span class="required">*</span></label><input class="form-input err" type="date"><span class="form-err">⚠ Required for compliance tracking</span></div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Location & Assignment</div>
+                <div class="form-grid form-grid-3">
+                  <div class="form-group"><label class="form-label">Region <span class="required">*</span></label><select class="form-select"><option selected>Gulf of Mexico</option><option>North Sea</option></select></div>
+                  <div class="form-group"><label class="form-label">Platform / Facility <span class="required">*</span></label><select class="form-select"><option>Platform A</option><option selected>Compression Train B</option></select></div>
+                  <div class="form-group"><label class="form-label">Deck / Module</label><input class="form-input" value="Module 3 — Compression"></div>
+                  <div class="form-group"><label class="form-label">Responsible Engineer <span class="required">*</span></label><input class="form-input" value="J. Rodriguez"></div>
+                  <div class="form-group"><label class="form-label">Cost Centre</label><input class="form-input" value="CC-GOM-COMP-004"></div>
+                  <div class="form-group"><label class="form-label">Project Code</label><input class="form-input" placeholder="Optional"></div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Notes</div>
+                <div class="form-group"><label class="form-label">Installation Notes</label><textarea class="form-textarea">Installed as part of GOM Compression Train B upgrade. Requires monthly vibration monitoring per BHC-PM-044 protocol.</textarea></div>
+              </div>
+            </div>
+            <div class="fc-foot"><span class="fc-foot-note">Fields marked <span style="color:var(--bh-red)">*</span> are required</span><div style="display:flex;gap:8px"><button class="btn btn-secondary">← Back</button><button class="btn btn-primary" onclick="show('maintenance')">Save & Continue →</button></div></div>
+          </div>
+        </div>
+        <div class="fsidebar">
+          <div class="sc">
+            <div class="sc-head">Registration Progress</div>
+            <div class="sc-body">
+              <div class="prog-steps">
+                <div class="ps"><div class="ps-left"><div class="ps-dot act">1</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl act">Asset Identification</div></div></div>
+                <div class="ps"><div class="ps-left"><div class="ps-dot todo">2</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl todo">Technical Specs</div></div></div>
+                <div class="ps"><div class="ps-left"><div class="ps-dot todo">3</div></div><div class="ps-content"><div class="ps-lbl todo">Maintenance Schedule</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="sc">
+            <div class="sc-head">Auto-generated</div>
+            <div class="sc-body">
+              <div class="info-row"><span class="info-k">Asset ID</span><span class="info-v" style="font-family:monospace;font-size:10px;color:var(--bh-red)">BH-TRB-2024-0249</span></div>
+              <div class="info-row"><span class="info-k">Created by</span><span class="info-v">J. Rodriguez</span></div>
+              <div class="info-row"><span class="info-k">Status</span><span class="info-v"><span class="badge b-pend">Draft</span></span></div>
+            </div>
+          </div>
+          <div class="sc">
+            <div class="sc-head">Class A Requirements</div>
+            <div class="sc-body"><div style="font-size:11px;color:var(--muted);line-height:1.6">Class A assets require Serial Number, Commissioning Date, and Cost Centre for regulatory compliance (BH Asset Policy AP-004).</div><div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:10px;font-weight:600;color:var(--warning)">⚠ 2 fields incomplete</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SCREEN 4: MAINTENANCE ══════ -->
+<div id="s-maintenance" class="content-section">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sb-item" onclick="show('dashboard')">⊞ Dashboard</div>
+        <div class="sb-item" onclick="show('inventory')">☰ Inventory <span class="sb-badge">248</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Asset Management</div>
+        <div class="sb-item" onclick="show('register')">+ Register Asset</div>
+        <div class="sb-item active">⚙ Maintenance <span class="sb-badge warn">3</span></div>
+      </div>
+      <div class="sb-user"><div class="sb-avatar">JR</div><div><div class="sb-name">J. Rodriguez</div><div class="sb-role">Field Engineer III</div></div></div>
+    </div>
+    <div class="main">
+      <div class="pg-header">
+        <div><div class="pg-title">Maintenance Request</div><div class="pg-sub">Raise a service or inspection request for a registered asset</div></div>
+        <div class="header-btns"><button class="btn btn-secondary btn-sm" onclick="show('dashboard')">← Cancel</button></div>
+      </div>
+      <div class="req-layout">
+        <div>
+          <div class="form-card">
+            <div class="fc-head"><div><div class="fc-title">Request Details</div><div class="fc-sub">Linked to BH-TRB-2023-0118 · NovaLT16 Gas Turbine</div></div><span class="badge b-att">Attention Required</span></div>
+            <div class="fc-body">
+              <div class="form-sec">
+                <div class="form-sec-title">Request Type & Priority</div>
+                <div class="form-grid form-grid-2" style="margin-bottom:14px">
+                  <div class="form-group"><label class="form-label">Request Type <span class="required">*</span></label><select class="form-select"><option selected>Predictive Maintenance</option><option>Corrective</option><option>Preventive</option><option>Inspection</option></select></div>
+                  <div class="form-group"><label class="form-label">Work Order Type <span class="required">*</span></label><select class="form-select"><option selected>Planned</option><option>Unplanned</option><option>Emergency</option></select></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Priority Level <span class="required">*</span></label>
+                  <div class="priority-sel" style="margin-top:5px">
+                    <div class="pri-opt" style="border-color:var(--success);background:var(--success-lt)"><div class="pri-dot" style="background:var(--success)"></div><div class="pri-lbl" style="color:var(--success)">Low</div></div>
+                    <div class="pri-opt sel med"><div class="pri-dot" style="background:var(--warning)"></div><div class="pri-lbl" style="color:var(--warning)">Medium</div></div>
+                    <div class="pri-opt"><div class="pri-dot" style="background:var(--bh-red)"></div><div class="pri-lbl" style="color:var(--bh-red)">High</div></div>
+                    <div class="pri-opt"><div class="pri-dot" style="background:#7C3AED"></div><div class="pri-lbl" style="color:#7C3AED">Critical</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Issue Description</div>
+                <div class="form-grid" style="gap:12px">
+                  <div class="form-group"><label class="form-label">Fault Code <span class="required">*</span></label><select class="form-select"><option selected>VIB-003 — Excessive vibration above threshold</option><option>THR-001 — Thermal runaway warning</option><option>OTH-999 — Other</option></select></div>
+                  <div class="form-group"><label class="form-label">Detailed Description <span class="required">*</span></label><textarea class="form-textarea" style="min-height:90px">Vibration readings on Compression Train B have exceeded the BH-VIB-004 threshold over the past 72 hours. System 1 flagged anomaly on 2024-11-08 at 14:32. Current reading: 8.4 mm/s RMS (threshold: 7.1 mm/s).</textarea></div>
+                  <div class="form-grid form-grid-2">
+                    <div class="form-group"><label class="form-label">First Observed <span class="required">*</span></label><input class="form-input" type="datetime-local" value="2024-11-08T14:32"></div>
+                    <div class="form-group"><label class="form-label">Operational Status <span class="required">*</span></label><select class="form-select"><option selected>Running — degraded</option><option>Running — normal</option><option>Shutdown</option></select></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Scheduling</div>
+                <div class="form-grid form-grid-3">
+                  <div class="form-group"><label class="form-label">Requested Date <span class="required">*</span></label><input class="form-input" type="date" value="2024-11-14"></div>
+                  <div class="form-group"><label class="form-label">Duration Estimate</label><select class="form-select"><option>2–4 hours</option><option selected>4–8 hours</option></select></div>
+                  <div class="form-group"><label class="form-label">Assign To</label><select class="form-select"><option selected>BH Service Team — GOM</option><option>On-site Maintenance</option></select></div>
+                </div>
+              </div>
+              <div class="form-sec">
+                <div class="form-sec-title">Supporting Evidence</div>
+                <div class="attach-zone"><div class="attach-icon">📎</div><div class="attach-txt">Drag files here or click to browse</div><div class="attach-sub">PDF, PNG, JPG, CSV · Max 25MB</div></div>
+                <div class="attached-file" style="margin-top:8px"><span>📊</span><span style="flex:1">System1_VibrationLog_2024-11-08.csv</span><span style="color:var(--muted)">142 KB</span><span style="color:var(--bh-red);cursor:pointer">✕</span></div>
+                <div class="attached-file"><span>📷</span><span style="flex:1">Turbine_Photo_Nov8.jpg</span><span style="color:var(--muted)">2.1 MB</span><span style="color:var(--bh-red);cursor:pointer">✕</span></div>
+              </div>
+            </div>
+            <div class="fc-foot"><span class="fc-foot-note">Routed to BH Service Team — Gulf of Mexico</span><div style="display:flex;gap:8px"><button class="btn btn-secondary">Save Draft</button><button class="btn btn-primary" onclick="show('success')">Submit Request →</button></div></div>
+          </div>
+        </div>
+        <div class="fsidebar">
+          <div class="asset-ctx">
+            <div class="ctx-lbl">Linked Asset</div>
+            <div class="ctx-id">BH-TRB-2023-0118</div>
+            <div class="ctx-name">NovaLT16 Gas Turbine</div>
+            <div class="ctx-tags"><span class="ctx-tag">Turbomachinery</span><span class="ctx-tag">Class A</span><span class="ctx-tag">Compression B</span></div>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;color:rgba(255,255,255,0.4)">Health Score</span><span style="font-size:11px;font-weight:700;color:#F5C842">61%</span></div>
+              <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px"><div style="width:61%;height:100%;background:#F5C842;border-radius:2px"></div></div>
+            </div>
+          </div>
+          <div class="sc">
+            <div class="sc-head">Pre-submission Checklist</div>
+            <div class="sc-body">
+              <div class="checklist">
+                <div class="cl-item done"><div class="cl-box done">✓</div>Fault code matches symptom</div>
+                <div class="cl-item done"><div class="cl-box done">✓</div>Description is specific</div>
+                <div class="cl-item done"><div class="cl-box done">✓</div>Evidence attached</div>
+                <div class="cl-item"><div class="cl-box todo"></div>Priority reviewed with supervisor</div>
+                <div class="cl-item"><div class="cl-box todo"></div>Operational impact assessed</div>
+              </div>
+            </div>
+          </div>
+          <div class="sc">
+            <div class="sc-head">Request History</div>
+            <div class="sc-body">
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="font-size:11px;border-left:2px solid var(--success);padding-left:9px"><div style="font-weight:600;color:var(--heading)">Scheduled Maintenance</div><div style="color:var(--muted)">Completed · 47 days ago</div></div>
+                <div style="font-size:11px;border-left:2px solid var(--success);padding-left:9px"><div style="font-weight:600;color:var(--heading)">Bearing Inspection</div><div style="color:var(--muted)">Completed · 3 months ago</div></div>
+                <div style="font-size:11px;border-left:2px solid var(--warning);padding-left:9px"><div style="font-weight:600;color:var(--heading)">Vibration Check</div><div style="color:var(--muted)">Deferred · 4 months ago</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SCREEN 5: SUCCESS ══════ -->
+<div id="s-success" class="content-section">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="sb-item" onclick="show('dashboard')">⊞ Dashboard</div>
+        <div class="sb-item" onclick="show('inventory')">☰ Inventory</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Asset Management</div>
+        <div class="sb-item" onclick="show('maintenance')">⚙ Maintenance</div>
+      </div>
+      <div class="sb-user"><div class="sb-avatar">JR</div><div><div class="sb-name">J. Rodriguez</div><div class="sb-role">Field Engineer III</div></div></div>
+    </div>
+    <div class="main">
+      <div class="success-screen">
+        <div class="success-card">
+          <div class="suc-icon">✅</div>
+          <div class="suc-title">Request Submitted</div>
+          <div class="suc-sub">Your maintenance request has been logged and routed to the Baker Hughes Service Team — Gulf of Mexico. Confirmation within 2 business hours.</div>
+          <div class="suc-ref"><div class="suc-ref-lbl">Work Order Reference</div><div class="suc-ref-id">WO-GOM-2024-03847</div></div>
+          <div class="suc-details">
+            <div class="suc-row"><span class="suc-k">Asset</span><span class="suc-v">NovaLT16 Gas Turbine</span></div>
+            <div class="suc-row"><span class="suc-k">Asset ID</span><span class="suc-v" style="font-family:monospace;font-size:11px">BH-TRB-2023-0118</span></div>
+            <div class="suc-row"><span class="suc-k">Type</span><span class="suc-v">Predictive Maintenance</span></div>
+            <div class="suc-row"><span class="suc-k">Priority</span><span class="suc-v"><span class="badge b-att">Medium</span></span></div>
+            <div class="suc-row"><span class="suc-k">Requested Date</span><span class="suc-v">14 November 2024</span></div>
+            <div class="suc-row"><span class="suc-k">Assigned To</span><span class="suc-v">BH Service Team — GOM</span></div>
+          </div>
+          <div class="suc-actions">
+            <button class="btn btn-secondary" onclick="show('maintenance')">← New Request</button>
+            <button class="btn btn-primary" onclick="show('dashboard')">Return to Dashboard</button>
+          </div>
+          <div class="next-steps">
+            <div class="ns-title">What happens next</div>
+            <div class="ns-item"><div class="ns-num">1</div>Service team confirms availability within 2 hours</div>
+            <div class="ns-item"><div class="ns-num">2</div>Work order scheduled — email confirmation sent</div>
+            <div class="ns-item"><div class="ns-num">3</div>Engineer arrives 14 November. Allow 4–8 hours.</div>
+            <div class="ns-item"><div class="ns-num">4</div>Post-service report uploaded to asset record within 48h</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ CASE STUDY ══════ -->
+<div id="s-casestudy" class="content-section">
+<style>
+.cs2-page { max-width: 760px; margin: 0 auto; padding: 56px 32px 80px; background: white; min-height: calc(100vh - 52px); }
+.cs2-cover { margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+.cs2-cover-tag { font-size: 11px; font-weight: 600; color: var(--bh-red); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+.cs2-cover-title { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; color: var(--heading); line-height: 1.1; margin-bottom: 20px; }
+.cs2-cover-title em { font-family: 'DM Serif Display', serif; font-style: italic; font-weight: 400; color: #777; }
+.cs2-meta-row { display: flex; gap: 0; flex-wrap: wrap; }
+.cs2-mc { padding-right: 28px; margin-right: 28px; border-right: 1px solid var(--border); }
+.cs2-mc:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+.cs2-ml { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.cs2-mv { font-size: 13px; color: var(--heading); font-weight: 500; }
+.cs2-block { margin-bottom: 56px; }
+.cs2-sl { font-size: 10px; font-weight: 700; color: var(--bh-red); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+.cs2-h2 { font-size: 24px; font-weight: 700; color: var(--heading); margin-bottom: 18px; letter-spacing: -0.02em; line-height: 1.25; }
+.cs2-p { font-size: 15px; line-height: 1.82; color: #444; margin-bottom: 15px; }
+.cs2-p strong { color: var(--heading); font-weight: 600; }
+.cs2-p:last-child { margin-bottom: 0; }
+.cs2-div { height: 1px; background: var(--border); margin: 48px 0; }
+.cs2-quote { border-left: 3px solid var(--bh-red); padding: 4px 0 4px 22px; margin: 28px 0; }
+.cs2-quote p { font-size: 18px; font-family: 'DM Serif Display', serif; font-style: italic; color: var(--heading); line-height: 1.55; }
+.cs2-callout { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 18px 22px; margin: 24px 0; }
+.cs2-callout-lbl { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; }
+.cs2-callout p { font-size: 13px; color: var(--body); line-height: 1.7; }
+.cs2-screen { margin: 32px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+.cs2-sbar { background: var(--bh-navy); padding: 9px 14px; display: flex; align-items: center; gap: 8px; }
+.cs2-sdots { display: flex; gap: 5px; }
+.cs2-sdots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+.cs2-stitle { font-size: 11px; color: rgba(255,255,255,0.4); margin-left: 8px; }
+.cs2-scap { background: var(--surface); border-top: 1px solid var(--border); padding: 9px 14px; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+.cs2-scap strong { color: var(--body); }
+.cs2-scap button { font-size: 11px; color: var(--bh-red); border: 1px solid rgba(200,16,46,0.25); background: white; border-radius: 3px; padding: 3px 9px; cursor: pointer; font-family: 'Inter',sans-serif; }
+.cs2-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+.cs2-insight { padding: 20px; border: 1px solid var(--border); border-radius: 7px; }
+.cs2-insight h4 { font-size: 13px; font-weight: 700; color: var(--heading); margin-bottom: 7px; line-height: 1.4; }
+.cs2-insight p { font-size: 12px; color: #666; line-height: 1.65; }
+/* screen preview helpers */
+.spv { background: var(--surface2); overflow: hidden; }
+.spi { pointer-events: none; transform-origin: top left; }
+</style>
+<style id="atmos-mobile-fixes">
+/* Keep the written case study to a readable, centered column at EVERY width. */
+#s-casestudy .cs2-page { max-width: 780px !important; margin-left: auto !important; margin-right: auto !important; }
+
+/* ATMOS responsive add-on (mobile only; desktop unchanged). Product-UI mockups left intact. */
+@media (max-width: 640px) {
+  html, body { overflow-x: hidden; }   /* no sideways page scroll; clip decorative excess */
+  .top-nav { padding: 0 12px; }
+  .top-nav-brand { display: none; }    /* keep the mark; free the row for links */
+  .top-nav-links { flex: 1 1 0; min-width: 0; margin-left: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .top-nav-links::-webkit-scrollbar { display: none; }
+  .nav-btn { flex-shrink: 0; }
+  .cs-wrap { padding: 32px 20px; }
+  .cs2-cover-title { font-size: 30px; }
+  /* collapse case-study CONTENT grids (product mockups stay multi-column) */
+  .role-banner, .prob-grid, .ba-grid, .refl-grid, .contrib-items, .cs2-insights { grid-template-columns: 1fr !important; }
+  img, svg, video, iframe { max-width: 100%; height: auto; }
+  /* App-demo sections are desktop layouts — keep proportions but make them swipeable
+     (mobile leads with the writeup; these stay one tap away in the nav). */
+  #s-dashboard, #s-inventory, #s-register, #s-maintenance, #s-success {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  #s-dashboard .app-shell, #s-inventory .app-shell, #s-register .app-shell,
+  #s-maintenance .app-shell, #s-success .app-shell { min-width: 900px; }
+}
+</style>
+
+<div class="cs2-page">
+  <div class="cs2-cover">
+    <div class="cs2-cover-tag">Baker Hughes · UX Case Study</div>
+    <div class="cs2-cover-title">Asset management<br>for people who can't<br><em>afford mistakes</em></div>
+    <div class="cs2-meta-row">
+      <div class="cs2-mc"><div class="cs2-ml">Client</div><div class="cs2-mv">Baker Hughes</div></div>
+      <div class="cs2-mc"><div class="cs2-ml">Employer</div><div class="cs2-mv">Capgemini</div></div>
+      <div class="cs2-mc"><div class="cs2-ml">My Role</div><div class="cs2-mv">UX Designer</div></div>
+      <div class="cs2-mc"><div class="cs2-ml">Users</div><div class="cs2-mv">Field Engineers</div></div>
+      <div class="cs2-mc"><div class="cs2-ml">Output</div><div class="cs2-mv">Figma Prototypes + Dev Handoff</div></div>
+    </div>
+  </div>
+
+  <section class="cv" aria-label="Baker Hughes walkthrough video"><video controls playsinline preload="metadata" poster="../thumbnails/bakerhughes-cover.jpg"><source src="../videos/bakerhughes.mp4" type="video/mp4"></video><p class="cv-cap"><span>Walkthrough</span><span>1:41</span></p></section>
+<div class="cs2-block">
+    <div class="cs2-sl">Background</div>
+    <div class="cs2-h2">What I was working on, and who for</div>
+    <p class="cs2-p">I was placed at Baker Hughes through Capgemini as a UX designer on their internal asset management platform. Baker Hughes manages industrial equipment — turbines, compressors, drilling tools, sensors — across offshore platforms and onshore facilities globally. The platform I was working on is what field engineers use to register new equipment, track health and maintenance history, and raise service requests.</p>
+    <p class="cs2-p">The engineers using this weren't casual users. They knew their equipment inside out. What they didn't have was a tool that matched how they actually worked. And in a context where a miscategorised asset or a missed commissioning date can mean a compliance failure, or a missed service on critical machinery, that gap mattered.</p>
+    <p class="cs2-p">Requirements came from the stakeholder side. My job wasn't to define what data the system needed to capture — that was already decided. My job was to figure out how a real person, probably under time pressure on an offshore platform, could do that accurately without needing to think about the tool.</p>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <div class="cs2-block">
+    <div class="cs2-sl">The Problem</div>
+    <div class="cs2-h2">The forms were technically correct. They just didn't work.</div>
+    <p class="cs2-p">The existing flow had everything it needed from a data perspective. All the fields were there. The problem was structure — or the lack of it.</p>
+    <p class="cs2-p">Asset registration involved 40+ fields in a single unbroken scroll. Mandatory and optional fields looked identical. There was no progress indicator, no grouping, no sense of how far through the task you were. Engineers were either abandoning halfway through, or submitting with gaps — particularly on fields like serial numbers and commissioning dates that were required for compliance but weren't visually distinct from anything else on the page.</p>
+    <p class="cs2-p">The bigger issue was what happened when something went wrong. Errors only surfaced at submission, and the messages were generic. "This field is required." That's not useful when you've just filled in 40 fields and have no idea which one failed. For Class A critical assets, this meant compliance issues weren't caught until an audit flagged them weeks later.</p>
+    <p class="cs2-p">And then there was the handoff problem. Designs were being passed to developers as flat screens with no annotations. Developers were making their own calls on validation logic, error states, conditional field rules — and what came out the other end often wasn't what was designed. The gap between the prototype and the build was where the user experience got lost.</p>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- DASHBOARD SCREEN -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Screen 1 of 5 — Dashboard</div>
+    <div class="cs2-h2">Starting with the overview</div>
+    <p class="cs2-p">The dashboard is the first screen engineers see. It needed to give them a quick read on the state of their asset fleet without requiring any interaction. Four KPI cards at the top — total, operational, attention, critical — give the high-level picture immediately. The asset cards below show individual equipment with health bars so the state of each asset is readable at a glance.</p>
+    <p class="cs2-p">Filter chips let engineers narrow by status or equipment type without navigating away. The sidebar stays consistent across every screen. The dashboard is intentionally passive — it's a read screen, not an action screen. That separation was a deliberate choice to keep the information hierarchy clear.</p>
+
+    <div class="cs2-screen">
+      <div class="cs2-sbar"><div class="cs2-sdots"><span></span><span></span><span></span></div><div class="cs2-stitle">Baker Hughes · Asset Management Portal — Dashboard</div></div>
+      <div class="spv" style="height:400px">
+        <div class="spi" style="width:1280px;transform:scale(0.556);margin-bottom:-312px">
+          <div style="display:flex;height:720px;background:#F8F8F8;font-family:Inter,sans-serif">
+            <div style="width:216px;background:#1A1A2E;flex-shrink:0;padding:20px 0">
+              <div style="padding:0 18px 8px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em">Overview</div>
+              <div style="padding:8px 18px;font-size:12px;color:white;background:rgba(200,16,46,0.15);border-left:2px solid #C8102E">⊞ Dashboard</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">☰ Inventory <span style="background:#C8102E;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">248</span></div>
+              <div style="padding:16px 18px 6px;margin-top:6px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em">Asset Management</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">+ Register Asset</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⚙ Maintenance <span style="background:#B45309;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">3</span></div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">★ Inspections</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">📄 Reports</div>
+            </div>
+            <div style="flex:1;padding:24px 28px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+                <div><div style="font-size:20px;font-weight:700;color:#111">Asset Overview</div><div style="font-size:12px;color:#888;margin-top:2px">Gulf of Mexico Region · Updated 14 min ago</div></div>
+                <div style="display:flex;gap:8px">
+                  <div style="padding:6px 12px;background:white;border:1px solid #D0D0D0;border-radius:4px;font-size:11px;color:#3D3D3D">⬇ Export</div>
+                  <div style="padding:6px 12px;background:#C8102E;color:white;border-radius:4px;font-size:11px">+ Register Asset</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
+                <div style="background:white;border-radius:7px;padding:16px;border:1px solid #E4E4E4"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Total Assets</div><div style="font-size:26px;font-weight:700;color:#111;margin-bottom:4px">248</div><div style="font-size:11px;color:#1E7D34">↑ 12 this month</div><div style="height:3px;background:#C8102E;border-radius:2px;margin-top:10px"></div></div>
+                <div style="background:white;border-radius:7px;padding:16px;border:1px solid #E4E4E4"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Operational</div><div style="font-size:26px;font-weight:700;color:#1E7D34;margin-bottom:4px">189</div><div style="font-size:11px;color:#888">76.2% of total</div><div style="height:3px;background:#1E7D34;border-radius:2px;margin-top:10px"></div></div>
+                <div style="background:white;border-radius:7px;padding:16px;border:1px solid #E4E4E4"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Needs Attention</div><div style="font-size:26px;font-weight:700;color:#B45309;margin-bottom:4px">41</div><div style="font-size:11px;color:#C8102E">↑ 5 this week</div><div style="height:3px;background:#B45309;border-radius:2px;margin-top:10px"></div></div>
+                <div style="background:white;border-radius:7px;padding:16px;border:1px solid #E4E4E4"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Critical / Offline</div><div style="font-size:26px;font-weight:700;color:#C8102E;margin-bottom:4px">18</div><div style="font-size:11px;color:#C8102E">↑ 2 in last 24h</div><div style="height:3px;background:#C8102E;border-radius:2px;margin-top:10px"></div></div>
+              </div>
+              <div style="background:white;border:1px solid #E4E4E4;border-radius:7px;padding:10px 14px;display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+                <span style="font-size:11px;color:#888;font-weight:600">Status:</span>
+                <span style="background:#C8102E;color:white;padding:3px 10px;border-radius:12px;font-size:11px">All (248)</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:3px 10px;border-radius:12px;font-size:11px">Operational (189)</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:3px 10px;border-radius:12px;font-size:11px">Attention (41)</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:3px 10px;border-radius:12px;font-size:11px">Critical (18)</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4;overflow:hidden">
+                  <div style="padding:11px 13px 7px;display:flex;justify-content:space-between;align-items:flex-start">
+                    <div><div style="font-size:9px;color:#888;font-family:monospace;margin-bottom:2px">BH-DRL-2024-0041</div><div style="font-size:12px;font-weight:600;color:#111;margin-bottom:1px">TRU-Steer Rotary</div><div style="font-size:10px;color:#888">Drilling · Platform A</div></div>
+                    <span style="background:#E8F5EB;color:#1E7D34;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">OK</span>
+                  </div>
+                  <div style="padding:0 13px 10px"><div style="display:flex;gap:12px;margin-top:6px"><div><div style="font-size:9px;color:#888">Health</div><div style="font-size:11px;font-weight:600;color:#1E7D34">94%</div></div><div><div style="font-size:9px;color:#888">Run Hours</div><div style="font-size:11px;font-weight:600;color:#111">1,240 h</div></div></div><div style="height:3px;background:#E4E4E4;border-radius:2px;margin-top:6px"><div style="width:94%;height:100%;background:#1E7D34;border-radius:2px"></div></div></div>
+                  <div style="padding:6px 13px;background:#F8F8F8;border-top:1px solid #E4E4E4;font-size:10px;color:#888;display:flex;justify-content:space-between"><span>Next: 18 days</span><span style="color:#C8102E">View →</span></div>
+                </div>
+                <div style="background:white;border-radius:7px;border:2px solid #C8102E;overflow:hidden;box-shadow:0 2px 12px rgba(200,16,46,0.12)">
+                  <div style="padding:11px 13px 7px;display:flex;justify-content:space-between;align-items:flex-start">
+                    <div><div style="font-size:9px;color:#888;font-family:monospace;margin-bottom:2px">BH-TRB-2023-0118</div><div style="font-size:12px;font-weight:600;color:#111;margin-bottom:1px">NovaLT16 Gas Turbine</div><div style="font-size:10px;color:#888">Turbomachinery · Train B</div></div>
+                    <span style="background:#FEF3C7;color:#B45309;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Attention</span>
+                  </div>
+                  <div style="padding:0 13px 10px"><div style="display:flex;gap:12px;margin-top:6px"><div><div style="font-size:9px;color:#888">Health</div><div style="font-size:11px;font-weight:600;color:#B45309">61%</div></div><div><div style="font-size:9px;color:#888">Run Hours</div><div style="font-size:11px;font-weight:600;color:#111">8,902 h</div></div></div><div style="height:3px;background:#E4E4E4;border-radius:2px;margin-top:6px"><div style="width:61%;height:100%;background:#B45309;border-radius:2px"></div></div></div>
+                  <div style="padding:6px 13px;background:#FEF3C7;border-top:1px solid #E4E4E4;font-size:10px;color:#B45309;display:flex;justify-content:space-between"><span>⚠ Vibration anomaly detected</span><span style="color:#C8102E">View →</span></div>
+                </div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4;overflow:hidden">
+                  <div style="padding:11px 13px 7px;display:flex;justify-content:space-between;align-items:flex-start">
+                    <div><div style="font-size:9px;color:#888;font-family:monospace;margin-bottom:2px">BH-SNS-2024-0209</div><div style="font-size:12px;font-weight:600;color:#111;margin-bottom:1px">Bently Nevada 3500/42M</div><div style="font-size:10px;color:#888">Sensors · Turbine Array</div></div>
+                    <span style="background:#FDF0F2;color:#C8102E;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px">Critical</span>
+                  </div>
+                  <div style="padding:0 13px 10px"><div style="display:flex;gap:12px;margin-top:6px"><div><div style="font-size:9px;color:#888">Health</div><div style="font-size:11px;font-weight:600;color:#C8102E">23%</div></div><div><div style="font-size:9px;color:#888">Run Hours</div><div style="font-size:11px;font-weight:600;color:#111">14,310 h</div></div></div><div style="height:3px;background:#E4E4E4;border-radius:2px;margin-top:6px"><div style="width:23%;height:100%;background:#C8102E;border-radius:2px"></div></div></div>
+                  <div style="padding:6px 13px;background:#FDF0F2;border-top:1px solid #E4E4E4;font-size:10px;color:#C8102E;display:flex;justify-content:space-between"><span>🔴 Offline — replacement needed</span><span style="background:#C8102E;color:white;padding:2px 7px;border-radius:3px;font-weight:600">Request</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cs2-scap"><span><strong>Dashboard</strong> — KPI cards, asset health, status filter chips</span><button onclick="show('dashboard')">Open interactive ↗</button></div>
+    </div>
+
+    <div class="cs2-callout">
+      <div class="cs2-callout-lbl">Design note</div>
+      <p>The dashboard is read-only by design. Engineers land here to understand the state of their fleet, not to take action immediately. Keeping it passive meant the information hierarchy stayed clear — nothing competing for attention with the status data.</p>
+    </div>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- INVENTORY -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Screen 2 of 5 — Inventory Table</div>
+    <div class="cs2-h2">Giving engineers their full list</div>
+    <p class="cs2-p">The inventory table is where engineers manage their complete asset register. All 248 assets, filterable by status, type, or location. A specific frustration with the previous tool was that engineers knew an asset ID but couldn't find it quickly — search was buried, there were no filters, and sort order was arbitrary.</p>
+    <p class="cs2-p">I added sortable columns, persistent filter chips, and inline status badges with health bars so engineers can triage by urgency without opening each record. Overdue maintenance shows directly in the "Next Due" column, colour-coded, so nothing important is hidden behind a click.</p>
+
+    <div class="cs2-screen">
+      <div class="cs2-sbar"><div class="cs2-sdots"><span></span><span></span><span></span></div><div class="cs2-stitle">Baker Hughes · Asset Management Portal — Inventory</div></div>
+      <div class="spv" style="height:360px">
+        <div class="spi" style="width:1280px;transform:scale(0.556);margin-bottom:-282px">
+          <div style="display:flex;height:648px;background:#F8F8F8;font-family:Inter,sans-serif">
+            <div style="width:216px;background:#1A1A2E;flex-shrink:0;padding:20px 0">
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⊞ Dashboard</div>
+              <div style="padding:8px 18px;font-size:12px;color:white;background:rgba(200,16,46,0.15);border-left:2px solid #C8102E">☰ Inventory <span style="background:#C8102E;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">248</span></div>
+              <div style="padding:16px 18px 6px;margin-top:6px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em">Asset Management</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">+ Register Asset</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⚙ Maintenance <span style="background:#B45309;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">3</span></div>
+            </div>
+            <div style="flex:1;padding:24px 28px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div><div style="font-size:20px;font-weight:700;color:#111">Asset Inventory</div><div style="font-size:12px;color:#888;margin-top:2px">248 assets across Gulf of Mexico Region</div></div>
+                <div style="background:#C8102E;color:white;border-radius:4px;padding:6px 12px;font-size:11px">+ Register Asset</div>
+              </div>
+              <div style="background:white;border:1px solid #E4E4E4;border-radius:7px;padding:9px 13px;display:flex;gap:8px;align-items:center;margin-bottom:13px;flex-wrap:wrap">
+                <span style="background:#C8102E;color:white;padding:2px 9px;border-radius:12px;font-size:11px">All</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:2px 9px;border-radius:12px;font-size:11px">Operational</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:2px 9px;border-radius:12px;font-size:11px">Attention</span>
+                <span style="border:1px solid #E4E4E4;color:#3D3D3D;padding:2px 9px;border-radius:12px;font-size:11px">Critical</span>
+                <div style="margin-left:auto;position:relative"><input style="height:26px;padding:0 8px 0 24px;border:1px solid #E4E4E4;border-radius:4px;font-size:11px;width:180px;background:#F8F8F8" placeholder="Search assets..."></div>
+              </div>
+              <div style="background:white;border-radius:7px;border:1px solid #E4E4E4;overflow:hidden">
+                <table style="width:100%;border-collapse:collapse;font-size:11px">
+                  <thead><tr style="background:#F8F8F8;border-bottom:1px solid #E4E4E4">
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase;white-space:nowrap">Asset ID</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Asset Name</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Category</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Status</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Health</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Last Service</th>
+                    <th style="padding:7px 12px;text-align:left;font-size:9px;color:#888;font-weight:600;text-transform:uppercase">Next Due</th>
+                    <th style="padding:7px 12px"></th>
+                  </tr></thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid #E4E4E4"><td style="padding:8px 12px;font-family:monospace;font-size:9px;color:#888">BH-DRL-2024-0041</td><td style="padding:8px 12px;color:#C8102E;font-weight:500">TRU-Steer Rotary Steerable</td><td style="padding:8px 12px;color:#555">Drilling</td><td style="padding:8px 12px"><span style="background:#E8F5EB;color:#1E7D34;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:700">Operational</span></td><td style="padding:8px 12px"><div style="width:56px;height:4px;background:#E4E4E4;border-radius:2px"><div style="width:94%;height:100%;background:#1E7D34;border-radius:2px"></div></div><div style="font-size:9px;color:#1E7D34;margin-top:2px">94%</div></td><td style="padding:8px 12px;color:#555;font-size:11px">12 days ago</td><td style="padding:8px 12px;color:#555">18 days</td><td style="padding:8px 12px"><span style="color:#888;font-size:12px">···</span></td></tr>
+                    <tr style="border-bottom:1px solid #E4E4E4;background:#FDF0F2"><td style="padding:8px 12px;font-family:monospace;font-size:9px;color:#888">BH-TRB-2023-0118</td><td style="padding:8px 12px;color:#C8102E;font-weight:500">NovaLT16 Gas Turbine</td><td style="padding:8px 12px;color:#555">Turbomachinery</td><td style="padding:8px 12px"><span style="background:#FEF3C7;color:#B45309;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:700">Attention</span></td><td style="padding:8px 12px"><div style="width:56px;height:4px;background:#E4E4E4;border-radius:2px"><div style="width:61%;height:100%;background:#B45309;border-radius:2px"></div></div><div style="font-size:9px;color:#B45309;margin-top:2px">61%</div></td><td style="padding:8px 12px;color:#555;font-size:11px">47 days ago</td><td style="padding:8px 12px;color:#B45309;font-weight:600">Overdue</td><td style="padding:8px 12px"><div style="background:#C8102E;color:white;font-size:9px;padding:3px 8px;border-radius:3px">Request</div></td></tr>
+                    <tr style="border-bottom:1px solid #E4E4E4"><td style="padding:8px 12px;font-family:monospace;font-size:9px;color:#888">BH-SNS-2024-0209</td><td style="padding:8px 12px;color:#C8102E;font-weight:500">Bently Nevada 3500/42M</td><td style="padding:8px 12px;color:#555">Sensors</td><td style="padding:8px 12px"><span style="background:#FDF0F2;color:#C8102E;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:700">Critical</span></td><td style="padding:8px 12px"><div style="width:56px;height:4px;background:#E4E4E4;border-radius:2px"><div style="width:23%;height:100%;background:#C8102E;border-radius:2px"></div></div><div style="font-size:9px;color:#C8102E;margin-top:2px">23%</div></td><td style="padding:8px 12px;color:#555;font-size:11px">91 days ago</td><td style="padding:8px 12px;color:#C8102E;font-weight:600">Critical</td><td style="padding:8px 12px"><div style="background:#C8102E;color:white;font-size:9px;padding:3px 8px;border-radius:3px">Urgent</div></td></tr>
+                    <tr style="border-bottom:1px solid #E4E4E4"><td style="padding:8px 12px;font-family:monospace;font-size:9px;color:#888">BH-CMP-2023-0055</td><td style="padding:8px 12px;color:#C8102E;font-weight:500">BCL Centrifugal Compressor</td><td style="padding:8px 12px;color:#555">Compression</td><td style="padding:8px 12px"><span style="background:#E8F5EB;color:#1E7D34;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:700">Operational</span></td><td style="padding:8px 12px"><div style="width:56px;height:4px;background:#E4E4E4;border-radius:2px"><div style="width:88%;height:100%;background:#1E7D34;border-radius:2px"></div></div><div style="font-size:9px;color:#1E7D34;margin-top:2px">88%</div></td><td style="padding:8px 12px;color:#555;font-size:11px">8 days ago</td><td style="padding:8px 12px;color:#555">22 days</td><td style="padding:8px 12px"><span style="color:#888;font-size:12px">···</span></td></tr>
+                    <tr><td style="padding:8px 12px;font-family:monospace;font-size:9px;color:#888">BH-FLW-2024-0077</td><td style="padding:8px 12px;color:#C8102E;font-weight:500">Panametrics DigitalFlow</td><td style="padding:8px 12px;color:#555">Flow Meters</td><td style="padding:8px 12px"><span style="background:#FEF3C7;color:#B45309;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:700">Attention</span></td><td style="padding:8px 12px"><div style="width:56px;height:4px;background:#E4E4E4;border-radius:2px"><div style="width:72%;height:100%;background:#B45309;border-radius:2px"></div></div><div style="font-size:9px;color:#B45309;margin-top:2px">72%</div></td><td style="padding:8px 12px;color:#555;font-size:11px">33 days ago</td><td style="padding:8px 12px;color:#B45309">7 days</td><td style="padding:8px 12px"><span style="color:#888;font-size:12px">···</span></td></tr>
+                  </tbody>
+                </table>
+                <div style="padding:9px 14px;border-top:1px solid #E4E4E4;background:#F8F8F8;display:flex;justify-content:space-between;align-items:center">
+                  <div style="font-size:11px;color:#888">Showing 1–8 of 248</div>
+                  <div style="display:flex;gap:3px">
+                    <div style="width:24px;height:24px;border:1px solid #E4E4E4;border-radius:3px;background:white;display:flex;align-items:center;justify-content:center;font-size:11px">‹</div>
+                    <div style="width:24px;height:24px;border:1px solid #C8102E;border-radius:3px;background:#C8102E;display:flex;align-items:center;justify-content:center;font-size:11px;color:white">1</div>
+                    <div style="width:24px;height:24px;border:1px solid #E4E4E4;border-radius:3px;background:white;display:flex;align-items:center;justify-content:center;font-size:11px">2</div>
+                    <div style="width:24px;height:24px;border:1px solid #E4E4E4;border-radius:3px;background:white;display:flex;align-items:center;justify-content:center;font-size:11px">3</div>
+                    <div style="width:24px;height:24px;border:1px solid #E4E4E4;border-radius:3px;background:white;display:flex;align-items:center;justify-content:center;font-size:11px">›</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cs2-scap"><span><strong>Inventory Table</strong> — sortable columns, inline health bars, overdue status visible without clicking</span><button onclick="show('inventory')">Open interactive ↗</button></div>
+    </div>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- REGISTRATION -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Screen 3 of 5 — Asset Registration Form</div>
+    <div class="cs2-h2">The form that caused the most problems — and needed the most work</div>
+    <p class="cs2-p">This was the core of the project. Asset registration had the highest abandonment rate and the highest error rate. The previous form was one long unbroken page — 40+ fields visible at once, no grouping, no indication of which fields were mandatory versus optional, no validation until you hit submit.</p>
+    <p class="cs2-p">I broke it into three named sections: Classification, Asset Details, and Location & Assignment. A progress sidebar on the right shows which step you're on and what's left. The sidebar also auto-generates an Asset ID and flags incomplete fields before submission — so engineers know what to fix before they even try.</p>
+    <p class="cs2-p">The validation banner shows as soon as an engineer tabs out of a required field. The error on Serial Number says: "Required for Class A assets." Not "Required." Specific to what they're registering. Engineers know their equipment — they just need the system to explain what it needs and why.</p>
+
+    <div class="cs2-screen">
+      <div class="cs2-sbar"><div class="cs2-sdots"><span></span><span></span><span></span></div><div class="cs2-stitle">Baker Hughes · Asset Management Portal — Register New Asset</div></div>
+      <div class="spv" style="height:420px">
+        <div class="spi" style="width:1280px;transform:scale(0.556);margin-bottom:-292px">
+          <div style="display:flex;height:756px;background:#F8F8F8;font-family:Inter,sans-serif">
+            <div style="width:216px;background:#1A1A2E;flex-shrink:0;padding:20px 0">
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⊞ Dashboard</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">☰ Inventory</div>
+              <div style="padding:8px 18px;font-size:12px;color:white;background:rgba(200,16,46,0.15);border-left:2px solid #C8102E">+ Register Asset</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⚙ Maintenance <span style="background:#B45309;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">3</span></div>
+            </div>
+            <div style="flex:1;padding:22px 26px;display:grid;grid-template-columns:1fr 252px;gap:16px">
+              <div>
+                <div style="margin-bottom:14px"><div style="font-size:20px;font-weight:700;color:#111;margin-bottom:2px">Register New Asset</div><div style="font-size:12px;color:#888">Add to Gulf of Mexico inventory</div></div>
+                <div style="background:#FDF0F2;border:1px solid rgba(200,16,46,0.2);border-radius:5px;padding:9px 13px;margin-bottom:13px;display:flex;gap:9px;align-items:flex-start">
+                  <div style="color:#C8102E;font-size:14px;flex-shrink:0;margin-top:1px">⚠</div>
+                  <div><div style="font-size:12px;font-weight:600;color:#C8102E;margin-bottom:3px">2 required fields need attention</div><ul style="font-size:11px;color:#3D3D3D;padding-left:14px"><li style="margin-bottom:2px">Serial Number — cannot be blank for Class A assets</li><li>Commissioning Date — required for compliance tracking</li></ul></div>
+                </div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:13px 17px;border-bottom:1px solid #E4E4E4;display:flex;justify-content:space-between;align-items:center">
+                    <div><div style="font-size:13px;font-weight:700;color:#111">Asset Identification</div><div style="font-size:11px;color:#888;margin-top:1px">Basic classification and identification</div></div>
+                    <span style="background:#EFF6FF;color:#1D4ED8;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px">Step 1 of 3</span>
+                  </div>
+                  <div style="padding:16px 17px">
+                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#111;padding-bottom:7px;border-bottom:1px solid #E4E4E4;margin-bottom:11px">Classification</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:14px">
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Category <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;background:white;padding:0 8px;display:flex;align-items:center;font-size:11px">Turbomachinery</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Product Line <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;background:white;padding:0 8px;display:flex;align-items:center;font-size:11px">Oilfield Services</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Asset Class <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;background:white;padding:0 8px;display:flex;align-items:center;font-size:11px">Critical — Class A</div></div>
+                    </div>
+                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#111;padding-bottom:7px;border-bottom:1px solid #E4E4E4;margin-bottom:11px">Asset Details</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Asset Name <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;padding:0 8px;display:flex;align-items:center;font-size:11px">NovaLT16 Gas Turbine</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Model No. <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;padding:0 8px;display:flex;align-items:center;font-size:11px">NLT16-GOM-2024</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Serial Number <span style="color:#C8102E">*</span></div><div style="height:30px;border:1.5px solid #C8102E;border-radius:4px;background:#FDF0F2;padding:0 8px;display:flex;align-items:center;font-size:11px;color:#bbb">e.g. BH-SN-24-004412</div><div style="font-size:10px;color:#C8102E;margin-top:2px">⚠ Required for Class A assets</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Commissioning Date <span style="color:#C8102E">*</span></div><div style="height:30px;border:1.5px solid #C8102E;border-radius:4px;background:#FDF0F2;padding:0 8px;display:flex;align-items:center;font-size:11px;color:#bbb">Select date</div><div style="font-size:10px;color:#C8102E;margin-top:2px">⚠ Required for compliance</div></div>
+                    </div>
+                  </div>
+                  <div style="padding:11px 17px;border-top:1px solid #E4E4E4;background:#F8F8F8;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 7px 7px">
+                    <span style="font-size:11px;color:#888">Fields marked * are required</span>
+                    <div style="background:#C8102E;color:white;border-radius:4px;padding:6px 14px;font-size:11px">Save & Continue →</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:10px 12px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#111">Registration Progress</div>
+                  <div style="padding:12px">
+                    <div style="display:flex;gap:9px;margin-bottom:11px"><div style="width:17px;height:17px;border-radius:50%;background:#C8102E;color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</div><div style="font-size:11px;color:#C8102E;font-weight:600;padding-top:2px">Asset Identification</div></div>
+                    <div style="display:flex;gap:9px;margin-bottom:11px"><div style="width:17px;height:17px;border-radius:50%;border:1.5px solid #D0D0D0;color:#888;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">2</div><div style="font-size:11px;color:#888;padding-top:2px">Technical Specs</div></div>
+                    <div style="display:flex;gap:9px"><div style="width:17px;height:17px;border-radius:50%;border:1.5px solid #D0D0D0;color:#888;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">3</div><div style="font-size:11px;color:#888;padding-top:2px">Maintenance Schedule</div></div>
+                  </div>
+                </div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:10px 12px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#111">Auto-generated</div>
+                  <div style="padding:12px">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:7px"><span style="color:#888">Asset ID</span><span style="font-family:monospace;font-size:9px;color:#C8102E;font-weight:700">BH-TRB-2024-0249</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:7px"><span style="color:#888">Status</span><span style="background:#EFF6FF;color:#1D4ED8;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700">Draft</span></div>
+                    <div style="padding-top:8px;border-top:1px solid #E4E4E4;font-size:10px;font-weight:600;color:#B45309">⚠ 2 fields incomplete</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cs2-scap"><span><strong>Asset Registration Form</strong> — inline validation errors, sectioned layout, progress sidebar</span><button onclick="show('register')">Open interactive ↗</button></div>
+    </div>
+
+    <div class="cs2-quote">
+      <p>The error message had to say why — not just "this field is required," but "required for Class A compliance tracking." If engineers understand the reason, they don't skip it. They go and find the information.</p>
+    </div>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- MAINTENANCE -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Screen 4 of 5 — Maintenance Request Form</div>
+    <div class="cs2-h2">Raising a request without losing context</div>
+    <p class="cs2-p">The maintenance request form had a specific problem: engineers would navigate to it, start filling it in, and then realise they needed to check something about the asset — health score, last service date, whether it was running or shut down. In the old flow, that meant leaving the form and losing progress.</p>
+    <p class="cs2-p">The sidebar on this screen shows the asset context persistently throughout — health bar, asset ID, current status, and last three service events. It's dark-backgrounded to be visually distinct from the form, so it reads as reference, not input. Engineers can check what they need without going anywhere.</p>
+    <p class="cs2-p">Priority uses a visual selector rather than a dropdown, because priority decisions under pressure shouldn't require reading through a list. The pre-submission checklist at the bottom of the sidebar catches the things engineers tend to miss before they hit submit.</p>
+
+    <div class="cs2-screen">
+      <div class="cs2-sbar"><div class="cs2-sdots"><span></span><span></span><span></span></div><div class="cs2-stitle">Baker Hughes · Asset Management Portal — Maintenance Request</div></div>
+      <div class="spv" style="height:400px">
+        <div class="spi" style="width:1280px;transform:scale(0.556);margin-bottom:-320px">
+          <div style="display:flex;height:720px;background:#F8F8F8;font-family:Inter,sans-serif">
+            <div style="width:216px;background:#1A1A2E;flex-shrink:0;padding:20px 0">
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⊞ Dashboard</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">☰ Inventory</div>
+              <div style="padding:8px 18px;font-size:12px;color:white;background:rgba(200,16,46,0.15);border-left:2px solid #C8102E">⚙ Maintenance <span style="background:#B45309;color:white;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">3</span></div>
+            </div>
+            <div style="flex:1;padding:22px 26px;display:grid;grid-template-columns:1fr 252px;gap:16px">
+              <div>
+                <div style="margin-bottom:14px"><div style="font-size:20px;font-weight:700;color:#111;margin-bottom:2px">Maintenance Request</div><div style="font-size:12px;color:#888">Raise a service or inspection request</div></div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:13px 17px;border-bottom:1px solid #E4E4E4;display:flex;justify-content:space-between;align-items:center">
+                    <div><div style="font-size:13px;font-weight:700;color:#111">Request Details</div><div style="font-size:11px;color:#888;margin-top:1px">Linked to BH-TRB-2023-0118 · NovaLT16</div></div>
+                    <span style="background:#FEF3C7;color:#B45309;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px">Attention Required</span>
+                  </div>
+                  <div style="padding:16px 17px">
+                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#111;padding-bottom:7px;border-bottom:1px solid #E4E4E4;margin-bottom:11px">Type & Priority</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px">
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Request Type <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;padding:0 8px;display:flex;align-items:center;font-size:11px">Predictive Maintenance</div></div>
+                      <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Work Order Type <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;padding:0 8px;display:flex;align-items:center;font-size:11px">Planned</div></div>
+                    </div>
+                    <div style="margin-bottom:13px">
+                      <div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:5px">Priority Level <span style="color:#C8102E">*</span></div>
+                      <div style="display:flex;gap:7px">
+                        <div style="flex:1;padding:7px;border-radius:4px;border:1px solid #1E7D34;background:#E8F5EB;text-align:center"><div style="width:6px;height:6px;border-radius:50%;background:#1E7D34;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:600;color:#1E7D34">Low</div></div>
+                        <div style="flex:1;padding:7px;border-radius:4px;border:2px solid #B45309;background:#FEF3C7;text-align:center"><div style="width:6px;height:6px;border-radius:50%;background:#B45309;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:700;color:#B45309">Medium ✓</div></div>
+                        <div style="flex:1;padding:7px;border-radius:4px;border:1px solid #E4E4E4;text-align:center"><div style="width:6px;height:6px;border-radius:50%;background:#C8102E;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:600;color:#C8102E">High</div></div>
+                        <div style="flex:1;padding:7px;border-radius:4px;border:1px solid #E4E4E4;text-align:center"><div style="width:6px;height:6px;border-radius:50%;background:#7C3AED;margin:0 auto 4px"></div><div style="font-size:10px;font-weight:600;color:#7C3AED">Critical</div></div>
+                      </div>
+                    </div>
+                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#111;padding-bottom:7px;border-bottom:1px solid #E4E4E4;margin-bottom:11px">Issue Description</div>
+                    <div style="margin-bottom:11px"><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Fault Code <span style="color:#C8102E">*</span></div><div style="height:30px;border:1px solid #D0D0D0;border-radius:4px;padding:0 8px;display:flex;align-items:center;font-size:11px">VIB-003 — Excessive vibration above threshold</div></div>
+                    <div><div style="font-size:10px;font-weight:600;color:#3D3D3D;margin-bottom:4px">Description <span style="color:#C8102E">*</span></div><div style="border:1px solid #D0D0D0;border-radius:4px;padding:7px 8px;font-size:11px;line-height:1.5;color:#111">Vibration on Compression Train B exceeded BH-VIB-004 threshold over last 72 hours. Current reading: 8.4 mm/s RMS (threshold: 7.1 mm/s). Gradual increase — not sudden onset.</div></div>
+                  </div>
+                  <div style="padding:11px 17px;border-top:1px solid #E4E4E4;background:#F8F8F8;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 7px 7px">
+                    <span style="font-size:11px;color:#888">Routed to BH Service Team — GOM</span>
+                    <div style="background:#C8102E;color:white;border-radius:4px;padding:6px 14px;font-size:11px">Submit Request →</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <div style="background:#1A1A2E;border-radius:7px;padding:14px">
+                  <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.32);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:7px">Linked Asset</div>
+                  <div style="font-size:9px;font-family:monospace;color:rgba(255,255,255,0.38);margin-bottom:2px">BH-TRB-2023-0118</div>
+                  <div style="font-size:13px;font-weight:700;color:white;margin-bottom:7px">NovaLT16 Gas Turbine</div>
+                  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:11px"><span style="font-size:9px;padding:2px 6px;background:rgba(255,255,255,0.1);border-radius:3px;color:rgba(255,255,255,0.62)">Turbomachinery</span><span style="font-size:9px;padding:2px 6px;background:rgba(255,255,255,0.1);border-radius:3px;color:rgba(255,255,255,0.62)">Class A</span><span style="font-size:9px;padding:2px 6px;background:rgba(255,255,255,0.1);border-radius:3px;color:rgba(255,255,255,0.62)">Train B</span></div>
+                  <div style="padding-top:9px;border-top:1px solid rgba(255,255,255,0.1)">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:rgba(255,255,255,0.38)">Health Score</span><span style="font-size:11px;font-weight:700;color:#F5C842">61%</span></div>
+                    <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px"><div style="width:61%;height:100%;background:#F5C842;border-radius:2px"></div></div>
+                  </div>
+                </div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:10px 12px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#111">Checklist</div>
+                  <div style="padding:11px;display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;gap:7px;padding:6px 8px;border-radius:4px;background:#E8F5EB;border:1px solid rgba(30,125,52,0.15);font-size:11px;color:#3D3D3D;align-items:center"><div style="width:12px;height:12px;background:#1E7D34;color:white;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0">✓</div>Fault code matches symptom</div>
+                    <div style="display:flex;gap:7px;padding:6px 8px;border-radius:4px;background:#E8F5EB;border:1px solid rgba(30,125,52,0.15);font-size:11px;color:#3D3D3D;align-items:center"><div style="width:12px;height:12px;background:#1E7D34;color:white;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0">✓</div>Evidence attached</div>
+                    <div style="display:flex;gap:7px;padding:6px 8px;border-radius:4px;border:1px solid #E4E4E4;font-size:11px;color:#3D3D3D;align-items:center"><div style="width:12px;height:12px;border:1.5px solid #D0D0D0;border-radius:2px;flex-shrink:0"></div>Priority reviewed with supervisor</div>
+                  </div>
+                </div>
+                <div style="background:white;border-radius:7px;border:1px solid #E4E4E4">
+                  <div style="padding:10px 12px;border-bottom:1px solid #E4E4E4;font-size:12px;font-weight:700;color:#111">Request History</div>
+                  <div style="padding:11px;display:flex;flex-direction:column;gap:8px">
+                    <div style="border-left:2px solid #1E7D34;padding-left:8px;font-size:11px"><div style="font-weight:600;color:#111">Scheduled Maintenance</div><div style="color:#888;margin-top:1px">Completed · 47 days ago</div></div>
+                    <div style="border-left:2px solid #1E7D34;padding-left:8px;font-size:11px"><div style="font-weight:600;color:#111">Bearing Inspection</div><div style="color:#888;margin-top:1px">Completed · 3 months ago</div></div>
+                    <div style="border-left:2px solid #B45309;padding-left:8px;font-size:11px"><div style="font-weight:600;color:#111">Vibration Check</div><div style="color:#888;margin-top:1px">Deferred · 4 months ago</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cs2-scap"><span><strong>Maintenance Request Form</strong> — persistent asset context, visual priority selector, pre-submission checklist</span><button onclick="show('maintenance')">Open interactive ↗</button></div>
+    </div>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- CONFIRMATION -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Screen 5 of 5 — Confirmation</div>
+    <div class="cs2-h2">The last screen matters more than people think</div>
+    <p class="cs2-p">The previous confirmation was a toast notification that disappeared after a few seconds. For engineers who'd just submitted a maintenance request for a turbine with vibration anomalies on a critical compression line, that wasn't reassuring.</p>
+    <p class="cs2-p">This screen gives them a work order reference number, a full summary of what was submitted, who it was sent to, and what happens next in numbered steps. It's not decorative — it gives engineers confidence that the right information was captured and routed, and reduces follow-up calls to the service team because the expected timeline is already visible.</p>
+
+    <div class="cs2-screen">
+      <div class="cs2-sbar"><div class="cs2-sdots"><span></span><span></span><span></span></div><div class="cs2-stitle">Baker Hughes · Asset Management Portal — Request Confirmed</div></div>
+      <div class="spv" style="height:400px">
+        <div class="spi" style="width:1280px;transform:scale(0.556);margin-bottom:-320px">
+          <div style="display:flex;height:720px;background:#F8F8F8;font-family:Inter,sans-serif">
+            <div style="width:216px;background:#1A1A2E;flex-shrink:0;padding:20px 0">
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⊞ Dashboard</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">☰ Inventory</div>
+              <div style="padding:8px 18px;font-size:12px;color:rgba(255,255,255,0.45)">⚙ Maintenance</div>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+              <div style="background:white;border-radius:12px;border:1px solid #E4E4E4;padding:40px 36px;max-width:440px;width:100%;text-align:center">
+                <div style="width:60px;height:60px;background:#E8F5EB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:26px">✅</div>
+                <div style="font-size:20px;font-weight:700;color:#111;margin-bottom:8px">Request Submitted</div>
+                <div style="font-size:13px;color:#888;line-height:1.6;margin-bottom:22px">Routed to BH Service Team — Gulf of Mexico. Confirmation within 2 business hours.</div>
+                <div style="background:#F8F8F8;border-radius:6px;padding:12px;margin-bottom:18px">
+                  <div style="font-size:9px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Work Order Reference</div>
+                  <div style="font-size:18px;font-weight:700;color:#111;font-family:monospace">WO-GOM-2024-03847</div>
+                </div>
+                <div style="text-align:left;border:1px solid #E4E4E4;border-radius:6px;overflow:hidden;margin-bottom:18px">
+                  <div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:11px;border-bottom:1px solid #E4E4E4"><span style="color:#888">Asset</span><span style="font-weight:600">NovaLT16 Gas Turbine</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:11px;border-bottom:1px solid #E4E4E4"><span style="color:#888">Type</span><span style="font-weight:600">Predictive Maintenance</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:11px;border-bottom:1px solid #E4E4E4"><span style="color:#888">Priority</span><span style="background:#FEF3C7;color:#B45309;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">Medium</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:11px"><span style="color:#888">Date</span><span style="font-weight:600">14 November 2024</span></div>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+                  <div style="border:1px solid #D0D0D0;border-radius:4px;padding:6px 14px;font-size:11px;color:#3D3D3D">← New Request</div>
+                  <div style="background:#C8102E;color:white;border-radius:4px;padding:6px 14px;font-size:11px">Return to Dashboard</div>
+                </div>
+                <div style="background:#F8F8F8;border-radius:6px;padding:12px;text-align:left">
+                  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#111;margin-bottom:7px">What happens next</div>
+                  <div style="display:flex;gap:7px;margin-bottom:5px;font-size:10px;color:#555;align-items:flex-start"><div style="width:14px;height:14px;background:#C8102E;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">1</div>Service team confirms within 2 hours</div>
+                  <div style="display:flex;gap:7px;margin-bottom:5px;font-size:10px;color:#555;align-items:flex-start"><div style="width:14px;height:14px;background:#C8102E;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">2</div>Work order scheduled, email sent</div>
+                  <div style="display:flex;gap:7px;font-size:10px;color:#555;align-items:flex-start"><div style="width:14px;height:14px;background:#C8102E;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">3</div>Post-service report uploaded within 48h</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cs2-scap"><span><strong>Confirmation Screen</strong> — work order reference, submission summary, next steps</span><button onclick="show('success')">Open interactive ↗</button></div>
+    </div>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- HANDOFF -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Handoff</div>
+    <div class="cs2-h2">Getting the prototype to build correctly</div>
+    <p class="cs2-p">One thing I learned early on this project: a good prototype that doesn't survive handoff is just a good prototype. The gap between what was designed and what previous cycles had actually built was significant — because developers were being handed flat screens and making their own calls on validation logic, conditional fields, and error states.</p>
+    <p class="cs2-p">For every screen I delivered an annotated spec alongside the Figma prototype. The spec covered every validation rule per field, what triggers it, the exact error message copy, what conditional logic shows or hides which fields, and how each component behaves in each state. I also ran handoff sessions with the dev team for the more complex forms — not to explain the design, but to answer the questions that would otherwise come back as bugs two weeks into build.</p>
+    <p class="cs2-p">The maintenance request form alone had around 20 individual interaction rules between it and the confirmation screen. Documenting those wasn't extra work — it was how I made sure the design made it to production in one piece.</p>
+  </div>
+
+  <div class="cs2-div"></div>
+
+  <!-- REFLECTION -->
+  <div class="cs2-block">
+    <div class="cs2-sl">Reflection</div>
+    <div class="cs2-h2">What I'd do differently, and what I wouldn't</div>
+    <p class="cs2-p">If I did it again, I'd agree measures with the team before designing: error rate at audit, form completion, and time to register a Class A asset. The feedback on the new flow was positive, and with those numbers I could show exactly how much it moved.</p>
+    <p class="cs2-p">What I wouldn't change: the time spent on handoff documentation. It felt slow, adding annotation layers and writing spec notes alongside the design. But it's what kept the build from diverging. And in a context where what gets built is what engineers actually use every day, that mattered.</p>
+    <p class="cs2-p">The other thing I'd keep: writing contextual error messages. "Required" on every field would have been faster. But engineers who know their domain deeply need the system to be honest with them about what it needs and why. Generic messages fail that. Specific ones don't.</p>
+
+    <div class="cs2-insights">
+      <div class="cs2-insight">
+        <h4>Requirements come from the system. The design has to come from the user.</h4>
+        <p>Every requirement I was given was accurate from a data perspective. The problem was translating it into a flow that matched how a field engineer actually thinks during registration. That translation is where the design work lives.</p>
+      </div>
+      <div class="cs2-insight">
+        <h4>The confirmation screen is part of the form, not an afterthought.</h4>
+        <p>The form ends when the engineer is confident something happened — not when they click submit. A work order reference and a clear next-step timeline isn't optional in high-stakes workflows. It's the last part of the design.</p>
+      </div>
+      <div class="cs2-insight">
+        <h4>Annotated handoff is the last mile of interaction design.</h4>
+        <p>Developers building from well-documented specs don't have to make design decisions. Developers building from flat screens do. The difference shows up in production — not in review.</p>
+      </div>
+      <div class="cs2-insight">
+        <h4>Inline validation only works if the messages are specific.</h4>
+        <p>"This field is required" tells an engineer nothing they didn't already know. "Required for Class A compliance tracking" tells them why it matters and makes it harder to skip.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+</div><!-- page-wrap -->
+
+<script>
+function show(name) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('s-' + name).classList.add('visible');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = {dashboard:0,inventory:1,register:2,maintenance:3,success:4,casestudy:5};
+  if (map[name] !== undefined) document.querySelectorAll('.nav-btn')[map[name]].classList.add('active');
+  window.scrollTo(0,0);
+}
+// On phones, lead with the written case study (moments-style); the app demo stays
+// one tap away in the nav. Desktop default is unchanged.
+try { if (window.matchMedia && matchMedia('(max-width: 640px)').matches) show('casestudy'); } catch (e) {}
+</script>
+<script>if(location.hash==='#casestudy'){try{show('casestudy')}catch(e){}}</script>
+</body>
+</html>

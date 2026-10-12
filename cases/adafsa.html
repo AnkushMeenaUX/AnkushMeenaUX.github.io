@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADAFSA Design System — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy: #1D2B5F;
+  --navy-mid: #2D3A7A;
+  --amber: #F5A623;
+  --white: #FFFFFF;
+  --surface: #F7F7F5;
+  --border: #E8E8E4;
+  --heading: #111111;
+  --body: #3D3D3A;
+  --muted: #8A8A85;
+  --link: #1B6EC2;
+  --success: #2E7D32;
+  --success-lt: #E8F5E9;
+  --error: #C62828;
+  --error-lt: #FFEBEE;
+  --warning-lt: #FFF8E1;
+  --info-lt: #E3F2FD;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--body); line-height: 1.6; }
+
+/* ── TYPOGRAPHY ── */
+.serif { font-family: 'DM Serif Display', serif; }
+h1, h2, h3, h4 { color: var(--heading); line-height: 1.2; }
+
+/* ── LAYOUT ── */
+.container { max-width: 960px; margin: 0 auto; padding: 0 40px; }
+.container-wide { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+
+/* ── NAV ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.97);
+  border-bottom: 1px solid var(--border);
+  height: 56px; display: flex; align-items: center;
+}
+.nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.nav-brand { font-size: 13px; font-weight: 600; color: var(--navy); letter-spacing: 0.02em; }
+.nav-links { display: flex; gap: 32px; }
+.nav-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+.nav-links a:hover { color: var(--heading); }
+.nav-tag { font-size: 11px; font-weight: 600; background: var(--amber); color: white; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.03em; }
+
+/* ── HERO ── */
+.hero {
+  padding: 140px 0 100px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.hero-eyebrow-line { width: 32px; height: 1px; background: var(--amber); }
+.hero-eyebrow-text { font-size: 12px; font-weight: 600; color: var(--amber); text-transform: uppercase; letter-spacing: 0.12em; }
+.hero h1 {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  color: var(--heading);
+}
+.hero h1 em { font-style: italic; font-family: 'DM Serif Display', serif; font-weight: 400; color: var(--navy); }
+.hero-sub {
+  font-size: 18px; color: var(--muted); max-width: 560px; line-height: 1.65;
+  margin-bottom: 48px; font-weight: 400;
+}
+.hero-meta {
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; width: fit-content;
+}
+.hero-meta-item { padding: 16px 28px; border-right: 1px solid var(--border); }
+.hero-meta-item:last-child { border-right: none; }
+.hero-meta-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.hero-meta-value { font-size: 14px; font-weight: 600; color: var(--heading); }
+
+/* ── SECTIONS ── */
+.section { padding: 96px 0; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom: none; }
+.section-num { font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+.section h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 20px; }
+.section h2 em { font-style: italic; font-family: 'DM Serif Display', serif; font-weight: 400; }
+.section-intro { font-size: 17px; color: var(--muted); max-width: 620px; line-height: 1.65; margin-bottom: 56px; }
+
+/* ── ROLE CARD ── */
+.role-banner {
+  background: var(--navy);
+  border-radius: 16px;
+  padding: 40px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 64px;
+}
+.role-item {}
+.role-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.role-value { font-size: 15px; font-weight: 500; color: white; line-height: 1.4; }
+
+/* ── PROBLEM CARDS ── */
+.problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+.problem-card {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.problem-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--amber);
+}
+.problem-card-num { font-size: 48px; font-weight: 800; color: var(--border); line-height: 1; margin-bottom: 12px; letter-spacing: -0.04em; }
+.problem-card h4 { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 8px; }
+.problem-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── PROCESS TIMELINE ── */
+.process-timeline { display: flex; flex-direction: column; gap: 0; margin: 48px 0; }
+.process-step { display: grid; grid-template-columns: 48px 1fr; gap: 24px; }
+.process-step-left { display: flex; flex-direction: column; align-items: center; }
+.process-step-dot {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--navy); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.process-step-line { width: 2px; flex: 1; background: var(--border); margin: 4px 0; min-height: 32px; }
+.process-step:last-child .process-step-line { display: none; }
+.process-step-content { padding: 12px 0 40px; }
+.process-step-content h4 { font-size: 17px; font-weight: 700; color: var(--heading); margin-bottom: 8px; }
+.process-step-content p { font-size: 14px; color: var(--muted); line-height: 1.65; max-width: 560px; }
+.process-step-tag { display: inline-block; font-size: 11px; font-weight: 600; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+
+/* ── SCREEN SHOWCASE ── */
+.screen-showcase {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 40px;
+  margin: 48px 0;
+  border: 1px solid var(--border);
+}
+.screen-showcase-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px; }
+
+/* MINI TAMM SCREEN */
+.mini-screen {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.mini-nav {
+  height: 44px; background: white; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+  font-size: 12px; font-weight: 700; color: var(--navy);
+}
+.mini-body { display: grid; grid-template-columns: 1fr 220px; gap: 0; }
+.mini-main { padding: 20px 24px; }
+.mini-sidebar { padding: 20px 16px; border-left: 1px solid var(--border); background: #FAFAFA; }
+.mini-breadcrumb { font-size: 10px; color: var(--link); margin-bottom: 8px; }
+.mini-title { font-size: 16px; font-weight: 700; color: var(--heading); margin-bottom: 16px; }
+.mini-section-title { font-size: 12px; font-weight: 700; color: var(--heading); margin-bottom: 12px; }
+.mini-label { font-size: 8px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.mini-stepper {
+  display: flex; align-items: center; height: 30px; border: 1px solid var(--border);
+  border-radius: 3px; background: white; width: 130px; margin-bottom: 12px;
+}
+.mini-stepper-btn { width: 30px; height: 30px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--body); flex-shrink: 0; }
+.mini-stepper-val { flex: 1; text-align: center; font-size: 12px; }
+.mini-radio-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.mini-radio { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--body); }
+.mini-radio-dot { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; }
+.mini-radio-dot.sel { background: var(--navy); border-color: var(--navy); }
+.mini-radio-inner { width: 5px; height: 5px; background: white; border-radius: 50%; }
+.mini-btn { display: inline-flex; align-items: center; height: 32px; padding: 0 16px; border-radius: 3px; background: var(--amber); color: white; font-size: 11px; font-weight: 600; border: none; }
+.mini-cancel { font-size: 11px; color: var(--link); text-decoration: underline; margin-left: 12px; }
+
+/* Process stepper mini */
+.mini-ps-title { font-size: 11px; font-weight: 700; color: var(--heading); margin-bottom: 12px; }
+.mini-ps-step { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.mini-ps-circle { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.mini-ps-circle.active { background: var(--navy); color: white; }
+.mini-ps-circle.done { background: var(--success); color: white; }
+.mini-ps-circle.pend { background: white; border: 1.5px solid var(--border); color: var(--muted); }
+.mini-ps-label { font-size: 10px; line-height: 1.4; }
+.mini-ps-label.active { color: var(--navy); font-weight: 600; }
+.mini-ps-label.pend { color: var(--muted); }
+
+/* ── DECISION CARDS ── */
+.decision-list { display: flex; flex-direction: column; gap: 24px; margin: 48px 0; }
+.decision-card {
+  display: grid; grid-template-columns: 48px 1fr;
+  gap: 20px; padding: 28px; border: 1px solid var(--border);
+  border-radius: 12px; background: var(--white);
+  transition: border-color 0.2s;
+}
+.decision-card:hover { border-color: var(--navy); }
+.decision-icon {
+  width: 48px; height: 48px; background: var(--surface);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.decision-content h4 { font-size: 16px; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
+.decision-content p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+.decision-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--amber); background: var(--warning-lt); padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+
+/* ── BEFORE / AFTER ── */
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 48px 0; }
+.ba-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.ba-header { padding: 16px 24px; display: flex; align-items: center; gap: 10px; }
+.ba-header.before { background: var(--error-lt); }
+.ba-header.after  { background: var(--success-lt); }
+.ba-header-dot { width: 8px; height: 8px; border-radius: 50%; }
+.ba-header.before .ba-header-dot { background: var(--error); }
+.ba-header.after  .ba-header-dot { background: var(--success); }
+.ba-header-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.ba-header.before .ba-header-title { color: var(--error); }
+.ba-header.after  .ba-header-title { color: var(--success); }
+.ba-body { padding: 24px; background: white; }
+.ba-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; font-size: 14px; color: var(--body); line-height: 1.5; }
+.ba-item:last-child { margin-bottom: 0; }
+.ba-item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── SYSTEM VISUAL ── */
+.system-visual { margin: 48px 0; }
+.system-layer {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; margin-bottom: 12px;
+}
+.system-layer-label {
+  width: 160px; flex-shrink: 0; background: var(--navy);
+  padding: 20px 20px; display: flex; align-items: center;
+}
+.system-layer-label span { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); writing-mode: horizontal-tb; }
+.system-layer-items { flex: 1; padding: 16px 20px; background: white; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.system-chip { font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--body); background: var(--surface); }
+.system-chip.highlight { background: var(--navy); color: white; border-color: var(--navy); }
+.system-chip.amber { background: var(--amber); color: white; border-color: var(--amber); }
+.system-arrow { text-align: center; font-size: 18px; color: var(--border); margin: -4px 0; }
+
+/* ── CONTRIBUTION HIGHLIGHT ── */
+.contribution { background: var(--navy); border-radius: 16px; padding: 56px 48px; margin: 48px 0; color: white; }
+.contribution-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+.contribution-quote { font-size: clamp(20px, 3vw, 28px); font-weight: 600; line-height: 1.45; color: white; margin-bottom: 32px; font-family: 'DM Serif Display', serif; font-style: italic; }
+.contribution-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.12); }
+.contribution-item {}
+.contribution-item-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.contribution-item-value { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.4; }
+
+/* ── COMPONENT SHOWCASE ── */
+.comp-showcase { margin: 48px 0; }
+.comp-row { margin-bottom: 40px; }
+.comp-row-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.comp-items { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; border-radius: 4px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; border: none; cursor: default; }
+.btn-primary  { background: var(--amber); color: white; }
+.btn-secondary{ background: white; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-ghost    { background: white; color: var(--body); border: 1px solid var(--border); }
+.btn-disabled { background: var(--border); color: var(--muted); }
+.btn-link     { background: transparent; color: var(--link); text-decoration: underline; padding: 0; height: auto; }
+
+/* INPUTS */
+.input-grp { display: flex; flex-direction: column; gap: 4px; }
+.input-lbl { font-size: 9px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.input-field { height: 36px; padding: 0 10px; border-radius: 4px; font-size: 12px; font-family: 'Inter',sans-serif; color: var(--muted); width: 200px; background: white; }
+.input-default { border: 1px solid var(--border); }
+.input-focus  { border: 1.5px solid var(--navy); color: var(--body); }
+.input-error  { border: 1.5px solid var(--error); }
+
+/* STEPPER */
+.stepper { display: flex; align-items: center; height: 36px; border-radius: 4px; border: 1px solid var(--border); background: white; width: 160px; }
+.stepper.active { border-color: var(--navy); border-width: 1.5px; }
+.s-btn { width: 36px; height: 36px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; color: var(--body); }
+.s-btn:first-child { border-radius: 3px 0 0 3px; }
+.s-btn:last-child  { border-radius: 0 3px 3px 0; }
+.s-val { flex: 1; text-align: center; font-size: 13px; color: var(--body); }
+.stepper.active .s-val { color: var(--navy); }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 11px; font-weight: 500; }
+.b-complete { background: var(--success-lt); color: var(--success); }
+.b-pending  { background: var(--warning-lt); color: #7A5000; }
+.b-declined { background: var(--error-lt);   color: var(--error); }
+.b-current  { background: var(--info-lt);    color: var(--navy); }
+.b-outlined { background: white; color: var(--body); border: 1px solid var(--border); font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* PROCESS STEPPER MINI COMPONENT */
+.ps { display: flex; flex-direction: column; gap: 0; width: 220px; }
+.ps-step { display: flex; gap: 10px; }
+.ps-left { display: flex; flex-direction: column; align-items: center; }
+.ps-circ { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.ps-circ.a { background: var(--navy); color: white; }
+.ps-circ.d { background: var(--success); color: white; }
+.ps-circ.p { background: white; border: 1.5px solid var(--border); color: var(--muted); font-weight: 400; font-size: 10px; }
+.ps-line { width: 2px; flex: 1; min-height: 20px; background: var(--border); margin: 2px 0; }
+.ps-line.done { background: var(--success); }
+.ps-content { padding-bottom: 14px; }
+.ps-lbl { font-size: 12px; padding-top: 3px; }
+.ps-lbl.a { color: var(--navy); font-weight: 600; }
+.ps-lbl.d { color: var(--body); }
+.ps-lbl.p { color: var(--muted); }
+
+/* ── REFLECTION ── */
+.reflection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 48px 0; }
+.reflection-card { padding: 28px; border-radius: 12px; border: 1px solid var(--border); }
+.reflection-card h4 { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.reflection-card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ── FOOTER ── */
+.footer { background: var(--heading); padding: 56px 0; }
+.footer-inner { display: flex; justify-content: space-between; align-items: center; }
+.footer-left h3 { font-size: 18px; font-weight: 700; color: white; margin-bottom: 4px; }
+.footer-left p  { font-size: 13px; color: rgba(255,255,255,0.4); }
+.footer-right { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+/* ── UTILITIES ── */
+.text-amber { color: var(--amber); }
+.text-navy  { color: var(--navy); }
+.text-muted { color: var(--muted); }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.prose { font-size: 16px; color: var(--body); line-height: 1.75; max-width: 680px; }
+.prose + .prose { margin-top: 16px; }
+.divider { height: 1px; background: var(--border); margin: 48px 0; }
+</style>
+<style id="atmos-mobile-fixes">
+/* ATMOS responsive add-on (mobile only; desktop unchanged). */
+@media (max-width: 640px) {
+  .container { padding: 0 20px; }
+  .section { padding: 56px 0; }
+  /* top nav: keep links on one swipeable row */
+  .nav-inner { gap: 12px; }
+  .nav-links { gap: 18px; flex: 1 1 0; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a { white-space: nowrap; }
+  /* collapse multi-column content grids to one column */
+  .role-banner, .problem-grid, .mini-body, .ba-grid,
+  .contribution-items, .reflection-grid { grid-template-columns: 1fr !important; }
+  .role-banner { padding: 28px 24px; gap: 22px; }
+  .contribution { padding: 36px 24px; }
+  .mini-sidebar { border-left: none; border-top: 1px solid var(--border); }
+  /* hero meta row → stacked */
+  .hero-meta { flex-direction: column; width: auto; }
+  .hero-meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero-meta-item:last-child { border-bottom: none; }
+  /* keep media fluid */
+  img, svg, video, iframe { max-width: 100%; height: auto; }
+}
+</style>
+<style id="cv-style">
+.cv{margin:0 auto 48px;max-width:760px;box-sizing:border-box}
+.cv video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6)}
+.cv-cap{display:flex;justify-content:space-between;gap:12px;margin:10px 2px 0;font:500 12px/1.4 'Martian Mono',ui-monospace,Menlo,monospace;letter-spacing:.02em;opacity:.7}
+.cs-back{display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border-radius:50%;border:1px solid currentColor;color:inherit;text-decoration:none;opacity:.75;transition:opacity .2s,background-color .2s;margin-right:10px}
+.cs-back:hover{opacity:1;background:rgba(127,127,127,.15)}
+.cs-back svg{width:16px;height:16px}
+.top-nav .cs-back{color:#EDEDEA}
+@media (max-width:640px){.cv{margin-bottom:32px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container-wide nav-inner">
+    <div style="display:flex;align-items:center"><a class="cs-back" href="../index.html" aria-label="Back to all work"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="nav-brand">ADAFSA — Design System</div></div>
+    <div class="nav-links">
+      <a href="#context">Context</a>
+      <a href="#problem">Problem</a>
+      <a href="#process">Process</a>
+      <a href="#decisions">Decisions</a>
+      <a href="#system">The System</a>
+      <a href="#reflection">Reflection</a>
+      <span class="nav-tag">Case Study</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <div class="hero-eyebrow-text">Design Systems · Government UX · Capgemini</div>
+    </div>
+    <h1>Bringing <em>system thinking</em><br>to a government<br>service platform</h1>
+    <p class="hero-sub">How I helped ADAFSA move from a collection of inconsistent screens to a documented, scalable component library — while embedded as the Capgemini designer in a cross-organisational team.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Client</div>
+        <div class="hero-meta-value">ADAFSA · Abu Dhabi Gov</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Platform</div>
+        <div class="hero-meta-value">TAMM e-Services</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">My Role</div>
+        <div class="hero-meta-value">UI/UX · Design Systems</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Team</div>
+        <div class="hero-meta-value">Capgemini + ADAFSA (3 designers)</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Deliverable</div>
+        <div class="hero-meta-value">Component Library + Docs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-top:8px"><section class="cv" aria-label="ADAFSA Design System walkthrough video"><video controls playsinline preload="metadata" poster="../thumbnails/adafsa-cover.jpg"><source src="../videos/adafsa.mp4" type="video/mp4"></video><p class="cv-cap"><span>Walkthrough</span><span>1:31</span></p></section></div>
+<!-- CONTEXT -->
+<div class="section" id="context">
+  <div class="container">
+    <div class="section-num">01 · Context</div>
+    <h2>The <em>situation</em> I walked into</h2>
+    <p class="section-intro">ADAFSA manages agricultural licensing, livestock management, food safety and fodder subsidies for Abu Dhabi's farming community — all through the UAE's TAMM government platform.</p>
+
+    <div class="role-banner">
+      <div class="role-item">
+        <div class="role-label">My position</div>
+        <div class="role-value">Designer from Capgemini, embedded within the ADAFSA product team alongside two client-side designers</div>
+      </div>
+      <div class="role-item">
+        <div class="role-label">The setup</div>
+        <div class="role-value">Three designers total. Approval and sign-off happened client-side. My job was to propose, justify, and build.</div>
+      </div>
+      <div class="role-item">
+        <div class="role-label">What existed</div>
+        <div class="role-value">Working screens. Real users. No underlying system, no documentation, no shared language between design and dev.</div>
+      </div>
+    </div>
+
+    <p class="prose">The TAMM platform already had live services running. Users — many of them farmers with limited digital experience, accessing the platform in Arabic — were submitting monthly livestock reports, requesting subsidised fodder, and tracking application status through these screens.</p>
+    <p class="prose mt-16">The screens worked. But every new service was being built from scratch because nobody had documented what patterns already existed. The result: three different implementations of the same form input, status labels that meant different things on different pages, and Arabic RTL layouts that had been applied as an afterthought on some screens and ignored on others.</p>
+
+    <!-- MINI SCREEN SHOWCASE -->
+    <div class="screen-showcase mt-32">
+      <div class="screen-showcase-label">The screens we were working from</div>
+      <div class="mini-screen">
+        <div class="mini-nav">
+          <span style="font-size:16px">☰ &nbsp; 🔍</span>
+          <span>تـمـم &nbsp; TAMM</span>
+          <span style="font-size:12px;font-weight:400;color:#888">عربي &nbsp; 👤</span>
+        </div>
+        <div class="mini-body">
+          <div class="mini-main">
+            <div class="mini-breadcrumb">Home › Environment & Agriculture › Livestock › Livestock Form</div>
+            <div class="mini-title">Request to Purchase Subsidised Fodder</div>
+            <div class="mini-section-title">Fill up Form</div>
+            <div style="font-size:11px;color:#888;margin-bottom:12px">Please enter the details requested below. Once completed, proceed to the next step.</div>
+            <div style="height:1px;background:#eee;margin-bottom:12px"></div>
+            <div style="font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:8px">Livestock Ownership <span style="font-size:8px;color:#888;font-weight:400;margin-left:6px">ALL FIELDS ARE MANDATORY</span></div>
+            <div style="font-size:11px;color:#444;margin-bottom:8px">Do you have sheep?</div>
+            <div class="mini-radio-row">
+              <div class="mini-radio"><div class="mini-radio-dot sel"><div class="mini-radio-inner"></div></div> Yes</div>
+              <div class="mini-radio"><div class="mini-radio-dot"></div> No</div>
+            </div>
+            <div class="mini-label">COUNT OF FEMALE SHEEP</div>
+            <div class="mini-stepper"><div class="mini-stepper-btn">—</div><div class="mini-stepper-val">15</div><div class="mini-stepper-btn">+</div></div>
+            <div class="mini-label">COUNT OF MALE SHEEP</div>
+            <div class="mini-stepper"><div class="mini-stepper-btn">—</div><div class="mini-stepper-val">15</div><div class="mini-stepper-btn">+</div></div>
+            <div style="margin-top:16px">
+              <button class="mini-btn">NEXT →</button>
+              <span class="mini-cancel">Cancel</span>
+            </div>
+          </div>
+          <div class="mini-sidebar">
+            <div class="mini-ps-title">Process</div>
+            <div class="mini-ps-step"><div class="mini-ps-circle active">1</div><div class="mini-ps-label active">Fill up Form</div></div>
+            <div class="mini-ps-step"><div class="mini-ps-circle pend">2</div><div class="mini-ps-label pend">Select Agriculture Card</div></div>
+            <div class="mini-ps-step"><div class="mini-ps-circle pend">3</div><div class="mini-ps-label pend">Specify Fodder Details</div></div>
+            <div class="mini-ps-step"><div class="mini-ps-circle pend">4</div><div class="mini-ps-label pend">Select Representative</div></div>
+            <div class="mini-ps-step"><div class="mini-ps-circle pend">5</div><div class="mini-ps-label pend">Make Payment</div></div>
+            <div class="mini-ps-step"><div class="mini-ps-circle pend">6</div><div class="mini-ps-label pend">Download Invoice</div></div>
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee">
+              <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:8px">Relevant Entity</div>
+              <div style="font-size:9px;font-weight:700;color:#1a1a1a;margin-bottom:4px">ABU DHABI AGRICULTURE AND FOOD SAFETY AUTHORITY</div>
+              <div style="font-size:9px;color:#888">800555 &nbsp;·&nbsp; www.adafsa.gov.ae</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="section" id="problem">
+  <div class="container">
+    <div class="section-num">02 · The Problem</div>
+    <h2>Three problems,<br>one <em>root cause</em></h2>
+    <p class="section-intro">The surface issues were all symptoms of the same thing: there was no shared design language. Every designer and developer was working from memory and personal interpretation.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-card-num">01</div>
+        <h4>Inconsistent UI across services</h4>
+        <p>The same number stepper input had three different visual implementations. Status indicators used different colours and labels for identical states across different services.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">02</div>
+        <h4>No documentation or handoff process</h4>
+        <p>There was no component documentation, no token naming, no usage guidance. Developers were eyeballing designs and making decisions that should have been specified. Every handoff was a conversation.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-num">03</div>
+        <h4>RTL Arabic support was broken</h4>
+        <p>Arabic layouts had been added reactively rather than designed for. Form inputs, the process stepper, and navigation elements didn't mirror correctly — a critical issue for a government service used primarily by Arabic speakers.</p>
+      </div>
+    </div>
+
+    <p class="prose">What made this complex was the team structure. With two client-side designers who had existing opinions about how things should look, and developers who needed clarity to build, I had to make the case for system thinking without having authority to mandate it. Every decision needed to be collaborative and well-reasoned.</p>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<div class="section" id="process">
+  <div class="container">
+    <div class="section-num">03 · My Process</div>
+    <h2>How I approached<br>building the <em>system</em></h2>
+    <p class="section-intro">I didn't start by designing new things. I started by understanding what already existed — because the goal was to document and systematise reality, not impose a new aesthetic.</p>
+
+    <div class="process-timeline">
+      <div class="process-step">
+        <div class="process-step-left">
+          <div class="process-step-dot">1</div>
+          <div class="process-step-line"></div>
+        </div>
+        <div class="process-step-content">
+          <div class="process-step-tag">Audit</div>
+          <h4>Inventory every screen and pattern</h4>
+          <p>I went through all existing ADAFSA services on TAMM and catalogued every UI element — every button, every input, every status indicator. The goal was to see what patterns actually existed before deciding what to standardise. This produced a list of 20 component types with 87 combined variants.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-left">
+          <div class="process-step-dot">2</div>
+          <div class="process-step-line"></div>
+        </div>
+        <div class="process-step-content">
+          <div class="process-step-tag">Extract</div>
+          <h4>Pull out the underlying tokens</h4>
+          <p>I mapped every hardcoded colour value, spacing unit and font size to a named token. The colour palette went from 34 unique hex values scattered across files down to 9 semantic tokens — primary, neutral, and semantic (success, error, warning, info). This was the foundation everything else would reference.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-left">
+          <div class="process-step-dot">3</div>
+          <div class="process-step-line"></div>
+        </div>
+        <div class="process-step-content">
+          <div class="process-step-tag">Align</div>
+          <h4>Get the client team on the same page</h4>
+          <p>Before building anything, I presented the audit findings to the two client designers. Showing them the inconsistencies side by side — three steppers, four status label variants — made the case for standardisation more effectively than any argument could. We aligned on the canonical version of each component together.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-left">
+          <div class="process-step-dot">4</div>
+          <div class="process-step-line"></div>
+        </div>
+        <div class="process-step-content">
+          <div class="process-step-tag">Build</div>
+          <h4>Design the component library</h4>
+          <p>With alignment in place, I built the component library in Figma — structured in layers: tokens, base components, composite components, page templates. Every component was built with all states (default, hover, focus, error, disabled) and RTL variants designed alongside the LTR version, not after.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="process-step-left">
+          <div class="process-step-dot">5</div>
+          <div class="process-step-line"></div>
+        </div>
+        <div class="process-step-content">
+          <div class="process-step-tag">Document</div>
+          <h4>Write usage guidance for every component</h4>
+          <p>A component library without documentation is just a collection of shapes. For each component I wrote: what it's for, when to use it, when not to, which token it references, and how it behaves in RTL. This was the piece the team had never had before — and the most time-consuming part of the work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY DECISIONS -->
+<div class="section" id="decisions">
+  <div class="container">
+    <div class="section-num">04 · Key Decisions</div>
+    <h2>The choices that<br><em>defined</em> the system</h2>
+    <p class="section-intro">Design systems are made of decisions. Here are the ones that mattered most on this project, and the reasoning behind each.</p>
+
+    <div class="decision-list">
+      <div class="decision-card">
+        <div class="decision-icon">🟡</div>
+        <div class="decision-content">
+          <div class="decision-tag">Color</div>
+          <h4>Amber as the primary CTA, not navy</h4>
+          <p>The ADAFSA brand is navy-led, but I chose amber (#F5A623) as the primary action colour. Navy on white creates sufficient contrast but reads as informational — amber creates urgency and focus on the action. More importantly, amber maintains contrast against both white backgrounds and navy sidebar panels, making it work across all layout contexts. This was a small change with significant impact on task completion clarity.</p>
+        </div>
+      </div>
+      <div class="decision-card">
+        <div class="decision-icon">📐</div>
+        <div class="decision-content">
+          <div class="decision-tag">Interaction Design</div>
+          <h4>Oversized touch targets on the number stepper</h4>
+          <p>The number stepper is the most-used input on the fodder subsidy form — farmers are entering counts for dozens of animals across multiple categories. I designed the minus and plus buttons at 40×40px, significantly larger than standard. The primary users are farmers, often on mobile, sometimes in outdoor conditions. Small touch targets on a high-frequency input would create real friction for real people.</p>
+        </div>
+      </div>
+      <div class="decision-card">
+        <div class="decision-icon">🔢</div>
+        <div class="decision-content">
+          <div class="decision-tag">Navigation Pattern</div>
+          <h4>The process stepper as the platform's primary nav metaphor</h4>
+          <p>Every ADAFSA service follows the same multi-step pattern. I standardised the vertical process stepper — with numbered steps, three states (pending, active, complete), and sub-step support — as the single navigation pattern for all services. This meant users only need to learn how it works once. It also gave developers a single, well-specified component to build, rather than reimplementing step navigation for every new service.</p>
+        </div>
+      </div>
+      <div class="decision-card">
+        <div class="decision-icon">🌐</div>
+        <div class="decision-content">
+          <div class="decision-tag">Internationalisation</div>
+          <h4>RTL as a first-class concern, not an afterthought</h4>
+          <p>The previous approach to Arabic was to flip the layout at the end. This consistently broke — particularly the process stepper, form inputs, and the breadcrumb navigation. I rebuilt every component using logical properties (start/end rather than left/right) so RTL is structural, not cosmetic. The stepper numbers re-sequence correctly, form labels align properly, and the breadcrumb reads right-to-left without manual overrides.</p>
+        </div>
+      </div>
+      <div class="decision-card">
+        <div class="decision-icon">📝</div>
+        <div class="decision-content">
+          <div class="decision-tag">Documentation</div>
+          <h4>Four status states, clearly named, strictly used</h4>
+          <p>Before the system, ADAFSA services used "In Progress", "Pending", "Submitted", "Under Review" and "Processing" — sometimes interchangeably, sometimes to mean different things. I reduced this to four named states: Current Step, Pending, Completed, Declined. Each has a defined meaning, a distinct colour token, and a usage rule. Clarity in naming is clarity in the user's mental model.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THE SYSTEM -->
+<div class="section" id="system">
+  <div class="container">
+    <div class="section-num">05 · The System</div>
+    <h2>What was <em>delivered</em></h2>
+    <p class="section-intro">The system is structured in four layers — tokens feed components, components compose templates, templates become services. Every layer references the one below it.</p>
+
+    <div class="system-visual">
+      <div class="system-layer">
+        <div class="system-layer-label"><span>Tokens</span></div>
+        <div class="system-layer-items">
+          <span class="system-chip highlight">Navy #1D2B5F</span>
+          <span class="system-chip amber">Amber #F5A623</span>
+          <span class="system-chip">Success #3A8F3A</span>
+          <span class="system-chip">Error #D94040</span>
+          <span class="system-chip">9 color tokens</span>
+          <span class="system-chip">8 spacing steps</span>
+          <span class="system-chip">5 type styles</span>
+          <span class="system-chip">4 radius values</span>
+        </div>
+      </div>
+      <div class="system-arrow">↓</div>
+      <div class="system-layer">
+        <div class="system-layer-label"><span>Base Components</span></div>
+        <div class="system-layer-items">
+          <span class="system-chip">Button (5 variants)</span>
+          <span class="system-chip">Input (4 states)</span>
+          <span class="system-chip">Number Stepper</span>
+          <span class="system-chip">Radio Group</span>
+          <span class="system-chip">Checkbox</span>
+          <span class="system-chip">Badge (4 types)</span>
+          <span class="system-chip">Date Picker</span>
+        </div>
+      </div>
+      <div class="system-arrow">↓</div>
+      <div class="system-layer">
+        <div class="system-layer-label"><span>Composite</span></div>
+        <div class="system-layer-items">
+          <span class="system-chip">Process Stepper</span>
+          <span class="system-chip">Relevant Entity Card</span>
+          <span class="system-chip">Application Table Row</span>
+          <span class="system-chip">Form Section</span>
+          <span class="system-chip">Top Navigation</span>
+          <span class="system-chip">UAE Footer</span>
+        </div>
+      </div>
+      <div class="system-arrow">↓</div>
+      <div class="system-layer">
+        <div class="system-layer-label"><span>Page Templates</span></div>
+        <div class="system-layer-items">
+          <span class="system-chip">Multi-step Form</span>
+          <span class="system-chip">Applications Tracker</span>
+          <span class="system-chip">Service Landing</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPONENT SHOWCASE -->
+    <div class="comp-showcase">
+      <div class="comp-row">
+        <div class="comp-row-label">Buttons — 5 variants, all states</div>
+        <div class="comp-items">
+          <div><button class="btn btn-primary">NEXT →</button><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Primary</div></div>
+          <div><button class="btn btn-secondary">ADD GROUP</button><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Secondary</div></div>
+          <div><button class="btn btn-ghost">ACTION ▾</button><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Ghost</div></div>
+          <div><button class="btn btn-disabled" disabled>NEXT →</button><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Disabled</div></div>
+          <div><button class="btn btn-link">Cancel</button><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Text Link</div></div>
+        </div>
+      </div>
+
+      <div class="comp-row">
+        <div class="comp-row-label">Number Stepper — default, active, zero, with helper</div>
+        <div class="comp-items" style="align-items:flex-start">
+          <div>
+            <div style="font-size:9px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Count of Female Sheep</div>
+            <div class="stepper"><div class="s-btn">—</div><div class="s-val">15</div><div class="s-btn">+</div></div>
+            <div style="font-size:10px;color:#bbb;margin-top:6px">Default</div>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Count of Male Sheep</div>
+            <div class="stepper active"><div class="s-btn">—</div><div class="s-val">15</div><div class="s-btn">+</div></div>
+            <div style="font-size:10px;color:#bbb;margin-top:6px">Active</div>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Newborns (with helper)</div>
+            <div class="stepper"><div class="s-btn">—</div><div class="s-val">0</div><div class="s-btn">+</div></div>
+            <div style="font-size:10px;color:#888;max-width:160px;margin-top:4px;line-height:1.3">From one day to two months old</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp-row">
+        <div class="comp-row-label">Status Badges — 4 semantic states</div>
+        <div class="comp-items">
+          <div><span class="badge b-complete">Completed</span><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Completed</div></div>
+          <div><span class="badge b-pending">Pending</span><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Pending</div></div>
+          <div><span class="badge b-declined">Declined</span><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Declined</div></div>
+          <div><span class="badge b-current">Current Step</span><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Current</div></div>
+          <div><span class="badge b-outlined">SERVICE CENTERS</span><div style="font-size:10px;color:#bbb;text-align:center;margin-top:6px">Outlined</div></div>
+        </div>
+      </div>
+
+      <div class="comp-row">
+        <div class="comp-row-label">Process Stepper — the platform's primary navigation component</div>
+        <div class="comp-items" style="gap:48px;align-items:flex-start">
+          <div>
+            <div style="font-size:10px;color:#bbb;margin-bottom:12px">Step 1 active with sub-steps</div>
+            <div class="ps">
+              <div class="ps-step">
+                <div class="ps-left"><div class="ps-circ a">1</div><div class="ps-line"></div></div>
+                <div class="ps-content">
+                  <div class="ps-lbl a">Fill up Form</div>
+                  <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">
+                    <div style="display:flex;gap:6px;align-items:center"><div style="width:14px;height:14px;border-radius:50%;background:#2E7D32;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:white;flex-shrink:0">✓</div><div style="font-size:11px;color:#555">Enter Sheep Details</div></div>
+                    <div style="display:flex;gap:6px;align-items:center"><div style="width:14px;height:14px;border-radius:50%;background:#1D2B5F;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:white;flex-shrink:0">2</div><div style="font-size:11px;color:#1D2B5F;font-weight:500">Enter Goats Details</div></div>
+                    <div style="display:flex;gap:6px;align-items:center"><div style="width:14px;height:14px;border-radius:50%;background:white;border:1.5px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:8px;color:#aaa;flex-shrink:0">3</div><div style="font-size:11px;color:#aaa">Enter Camels Details</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">2</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Select Agriculture Card</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">3</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Specify Fodder Details</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">4</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Select Representative</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">5</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Make Payment</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">6</div></div><div class="ps-content"><div class="ps-lbl p">Download Invoice</div></div></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:#bbb;margin-bottom:12px">Mid-journey — step 3 active</div>
+            <div class="ps">
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ d">✓</div><div class="ps-line done"></div></div><div class="ps-content"><div class="ps-lbl d">Fill up Form</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ d">✓</div><div class="ps-line done"></div></div><div class="ps-content"><div class="ps-lbl d">Select Agriculture Card</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ a">3</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl a">Specify Fodder Details</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">4</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Select Representative</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">5</div><div class="ps-line"></div></div><div class="ps-content"><div class="ps-lbl p">Make Payment</div></div></div>
+              <div class="ps-step"><div class="ps-left"><div class="ps-circ p">6</div></div><div class="ps-content"><div class="ps-lbl p">Download Invoice</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEFORE AFTER -->
+    <div class="ba-grid">
+      <div class="ba-card">
+        <div class="ba-header before">
+          <div class="ba-header-dot"></div>
+          <div class="ba-header-title">Before — What I found</div>
+        </div>
+        <div class="ba-body">
+          <div class="ba-item"><div class="ba-item-icon">✕</div>3 different number stepper implementations with inconsistent behaviour</div>
+          <div class="ba-item"><div class="ba-item-icon">✕</div>34 unique colour values with no naming or grouping</div>
+          <div class="ba-item"><div class="ba-item-icon">✕</div>5 different status labels used interchangeably for the same states</div>
+          <div class="ba-item"><div class="ba-item-icon">✕</div>RTL applied reactively — breaking process stepper and form inputs</div>
+          <div class="ba-item"><div class="ba-item-icon">✕</div>No component documentation — every handoff was a conversation</div>
+          <div class="ba-item"><div class="ba-item-icon">✕</div>Developers rebuilding components from scratch for each new service</div>
+        </div>
+      </div>
+      <div class="ba-card">
+        <div class="ba-header after">
+          <div class="ba-header-dot"></div>
+          <div class="ba-header-title">After — What I delivered</div>
+        </div>
+        <div class="ba-body">
+          <div class="ba-item"><div class="ba-item-icon">✓</div>1 canonical number stepper — specified, documented, RTL-ready</div>
+          <div class="ba-item"><div class="ba-item-icon">✓</div>9 semantic colour tokens covering every use case</div>
+          <div class="ba-item"><div class="ba-item-icon">✓</div>4 named status states with clear definitions and usage rules</div>
+          <div class="ba-item"><div class="ba-item-icon">✓</div>RTL built structurally into every component from the start</div>
+          <div class="ba-item"><div class="ba-item-icon">✓</div>Full component library with usage guidance for every component</div>
+          <div class="ba-item"><div class="ba-item-icon">✓</div>20 components, 87 variants — a shared language for the whole team</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY CONTRIBUTION -->
+<div class="section">
+  <div class="container">
+    <div class="contribution">
+      <div class="contribution-label">My contribution</div>
+      <div class="contribution-quote">I wasn't there to redesign the product. I was there to give the team a shared language — so every designer and every developer could make consistent decisions without needing to ask.</div>
+      <div class="contribution-items">
+        <div class="contribution-item">
+          <div class="contribution-item-label">System thinking</div>
+          <div class="contribution-item-value">Identified the underlying token structure, named it, and made it the foundation everything else referenced</div>
+        </div>
+        <div class="contribution-item">
+          <div class="contribution-item-label">Collaboration</div>
+          <div class="contribution-item-value">Worked across Capgemini and ADAFSA teams — proposing, justifying, and aligning rather than dictating</div>
+        </div>
+        <div class="contribution-item">
+          <div class="contribution-item-label">Documentation</div>
+          <div class="contribution-item-value">Wrote the component documentation and usage guidance the team had never had — making the system usable, not just deliverable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="section" id="reflection">
+  <div class="container">
+    <div class="section-num">06 · Reflection</div>
+    <h2>What I learned</h2>
+    <p class="section-intro">Three things this project taught me that I carry into every project now.</p>
+
+    <div class="reflection-grid">
+      <div class="reflection-card">
+        <h4>🏗️ &nbsp; Systems work is political, not just technical</h4>
+        <p>Getting two client-side designers to adopt a shared system required showing, not telling. The audit — seeing 34 colour values listed side by side — made the case in a way that arguments couldn't. The lesson: make problems visible before proposing solutions.</p>
+      </div>
+      <div class="reflection-card">
+        <h4>🌐 &nbsp; RTL is a design decision, not a dev task</h4>
+        <p>Arabic layout support fails when designers treat it as a developer concern. Every component needs to be conceived bidirectionally from the start. I now design with logical properties in mind from the first frame, not after everything is built.</p>
+      </div>
+      <div class="reflection-card">
+        <h4>📝 &nbsp; Naming is design</h4>
+        <p>Standardising the four status states had as much user impact as any visual change. When the system uses clear, consistent language, the product does too. Good naming reduces user confusion without changing a single pixel.</p>
+      </div>
+      <div class="reflection-card">
+        <h4>📊 &nbsp; Not measuring outcomes is a gap to close</h4>
+        <p>The team's feedback was that builds became faster and more consistent once the library existed. We never instrumented that, which is the one thing I'd change: next time I'd set success criteria at the start, like time to ship a new service and design QA issues per release, so the outcome is shown with evidence and not only feedback.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-left">
+      <h3>ADAFSA Design System</h3>
+      <p>TAMM Platform · Abu Dhabi Agriculture and Food Safety Authority · Capgemini</p>
+    </div>
+    <div class="footer-right">UI/UX Design · Design Systems · Capgemini</div>
+  </div>
+</footer>
+
+<script>
+  const links = document.querySelectorAll('.nav-links a');
+  const sections = document.querySelectorAll('.section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    links.forEach(l => {
+      l.style.color = l.getAttribute('href') === '#' + current ? '#111' : '';
+    });
+  });
+</script>
+</body>
+</html>

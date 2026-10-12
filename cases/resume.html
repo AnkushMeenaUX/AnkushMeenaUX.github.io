@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Résumé, Ankush Meena</title>
+<meta name="description" content="Ankush Meena, product designer. Five years across healthcare, industrial field ops and government design systems.">
+<meta name="theme-color" content="#0F0F0F">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F0F0F;--ink:#EDEDEA;--muted:#B5B5AF;--muted-2:#9A9A94;--line:#2E2E2C;--panel:#1A1A19;--accent:#FF6A2B;--on-accent:#131313;--ok:#3CCB7F;--ease:cubic-bezier(.16,1,.3,1);
+  --sans:'Familjen Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'Martian Mono',ui-monospace,Menlo,monospace;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--ink)}a:hover{color:#fff}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0}
+.back{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-weight:700;font-size:18px}
+.back .arr{width:36px;height:36px;border-radius:50%;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;opacity:.8;transition:opacity .2s,background-color .2s}
+.back:hover .arr{opacity:1;background:rgba(255,255,255,.08)}
+.back svg{width:16px;height:16px}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 20px;border-radius:999px;font:600 15px/1 var(--sans);text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);background:transparent;cursor:pointer;transition:transform .2s var(--ease),background-color .2s}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn-accent:hover{color:var(--on-accent);background:#FF7D45}
+.btn svg{width:14px;height:14px}
+
+header.top{padding:40px 0 48px;border-bottom:1.5px solid var(--ink);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:28px}
+h1{margin:0;font-size:clamp(44px,6vw,72px);line-height:.95;letter-spacing:-.045em;font-weight:700}
+.role{margin:14px 0 0;font-size:20px;font-weight:600}
+.role span{color:var(--accent)}
+.lede{margin:16px 0 0;max-width:36em;color:var(--muted);font-size:18px}
+.status{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:15px;color:var(--muted)}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.contact{display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--muted);text-align:right}
+.contact a{color:var(--muted)}
+
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+.sec{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px 40px}
+h2{margin:0;font-size:22px;letter-spacing:-.01em;font-weight:700}
+.job{padding:0 0 32px}
+.job+.job{padding-top:32px;border-top:1px solid var(--line)}
+.job:last-child{padding-bottom:0}
+.job-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+.job-h h3{margin:0;font-size:24px;letter-spacing:-.02em;font-weight:700}
+.job-h .dates{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.where{margin:4px 0 14px;color:var(--muted-2);font-size:15px}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px}
+li{color:var(--muted)}
+li::marker{color:var(--accent)}
+li strong{color:var(--ink);font-weight:600}
+
+.works{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.works li{color:var(--ink)}
+.works a{display:flex;flex-direction:column;gap:10px;height:100%;padding:12px 12px 16px;border-radius:12px;background:var(--panel);text-decoration:none;transition:transform .25s var(--ease),background-color .2s}
+.works a:hover{transform:translateY(-2px);background:#222220}
+.works img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
+.works .code{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.works .t{font-weight:700;font-size:18px;line-height:1.2}
+.works .s{font-size:14px;color:var(--muted)}
+
+.skillgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:28px 32px}
+.skillgrid .k{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
+.skillgrid .k span{color:var(--accent)}
+.chips{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.chips li{color:var(--ink);font-size:14px;line-height:1;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);transition:border-color .2s,color .2s}
+.chips li:hover{border-color:var(--accent)}
+.k{margin:0 0 10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:24px 40px}
+.two p{margin:0;color:var(--muted)}
+.two strong{color:var(--ink);font-weight:600}
+
+footer{padding:56px 0;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px}
+footer p{margin:0;color:var(--muted)}
+
+@media (max-width:760px){
+  .sec{grid-template-columns:1fr;gap:20px}
+  .contact{text-align:left}
+  .wrap{padding:0 16px}
+  nav .btn span.long{display:none}
+}
+@media (prefers-reduced-motion:reduce){.works a:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav aria-label="Résumé">
+  <a class="back" href="../index.html"><span class="arr"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ankush Meena</a>
+  <a class="btn btn-accent" href="../Ankush_Meena_Resume.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-5-5m5 5l5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Download<span class="long"> PDF</span></span></a>
+</nav>
+
+<header class="top">
+  <div>
+    <h1>Ankush Meena</h1>
+    <p class="role">Product Designer <span>/</span> UX/UI and Design Systems</p>
+    <p class="lede">From oil fields to delivery rooms, I design systems that work when it matters most. Five years across healthcare, industrial field operations and government design systems.</p>
+    <span class="status">Immediately available for full-time, contract and remote roles</span>
+  </div>
+  <address class="contact" style="font-style:normal">
+    <span>Jaipur, Rajasthan, India</span>
+    <a href="mailto:ankushmeena0779@gmail.com">ankushmeena0779@gmail.com</a>
+    <span>+91 96020 93380</span>
+    <a href="https://linkedin.com/in/ankushmeena" target="_blank" rel="noopener">LinkedIn</a>
+  </address>
+</header>
+
+<main>
+<section class="sec" aria-labelledby="exp">
+  <h2 id="exp">Experience</h2>
+  <div>
+    <article class="job">
+      <div class="job-h"><h3>Freelance Product Designer</h3><span class="dates">Feb 2023 - Present</span></div>
+      <p class="where">Independent practice, remote</p>
+      <ul>
+        <li>Designed <strong>MOMents</strong>, an AI-powered pregnancy wellness app for a seed-stage startup: led end-to-end UX from 8 user interviews and a 4-app competitor audit to a 6-screen hi-fi prototype and full design system in 10 weeks.</li>
+        <li>Delivered 3 further projects across web design, interaction design and Framer development, owning research, wireframes, hi-fi design and developer handoff on each.</li>
+      </ul>
+    </article>
+    <article class="job">
+      <div class="job-h"><h3>UX Designer, Capgemini</h3><span class="dates">Jul 2021 - Jan 2023</span></div>
+      <p class="where">Full-time, Jaipur</p>
+      <ul>
+        <li>Built a government design system for <strong>ADAFSA</strong> on the UAE's TAMM platform as the Capgemini designer embedded with the client team: 34 hardcoded colours became 9 tokens, and 20 components shipped with 87 variants, Arabic RTL support and full Figma documentation.</li>
+        <li>Redesigned <strong>Baker Hughes</strong>' asset management platform for offshore field engineers: split a 40+ field registration form into 3 guided sections with specific inline validation, and annotated around 20 interaction rules for developers.</li>
+        <li>Led UX for <strong>MediScribe</strong>, an AI consultation scribe for Capgemini's internal health clinic: a doctor interface that asks for nothing mid-consultation, plus a patient app with plain-language visit summaries.</li>
+        <li>Improved signup conversion by <strong>37.5%</strong> by redesigning a core onboarding flow with clearer hierarchy, inline validation and fewer fields.</li>
+        <li>Consolidated duplicate internal tools used by Sales, Operations and Engineering into a single platform through cross-functional alignment sessions.</li>
+        <li>Owned design system governance, usability testing, design QA and developer handoff across concurrent product tracks.</li>
+      </ul>
+    </article>
+    <article class="job">
+      <div class="job-h"><h3>Visual Designer, Micromax</h3><span class="dates">Aug 2020 - Jan 2021</span></div>
+      <p class="where">Live industry project, Pearl Academy</p>
+      <ul>
+        <li>Redesigned the UI system for smartwatch and earphone companion apps on Android and iOS, with consistent interaction patterns and an updated visual language.</li>
+        <li>Tested earphone compatibility and EQ visualiser behaviour across device variants, resolving edge cases before production release.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="work">
+  <h2 id="work">Selected work</h2>
+  <ul class="works">
+    <li><a href="mediscribe.html#casestudy"><img src="../thumbnails/mediscribe-poster.jpg" alt="" loading="lazy"><span class="code">A1</span><span class="t">MediScribe</span><span class="s">Healthcare AI</span></a></li>
+    <li><a href="adafsa.html"><img src="../thumbnails/adafsa-poster.jpg" alt="" loading="lazy"><span class="code">A2</span><span class="t">ADAFSA Design System</span><span class="s">Government design system</span></a></li>
+    <li><a href="bakerhughes.html#casestudy"><img src="../thumbnails/bakerhughes-poster.jpg" alt="" loading="lazy"><span class="code">A3</span><span class="t">Baker Hughes</span><span class="s">Enterprise field ops</span></a></li>
+    <li><a href="moments.html"><img src="../thumbnails/moments-poster.jpg" alt="" loading="lazy"><span class="code">A4</span><span class="t">MOMents</span><span class="s">Consumer mobile</span></a></li>
+  </ul>
+</section>
+
+<section class="sec" aria-labelledby="skills">
+  <h2 id="skills">Skills</h2>
+  <div>
+    <div class="skillgrid">
+      <div><p class="k"><span>01</span>Design</p>
+      <ul class="chips"><li>Product design</li><li>UX/UI</li><li>Interaction design</li><li>Design systems</li><li>Prototyping</li><li>Wireframing</li><li>Responsive design</li><li>Accessibility</li><li>Visual identity</li></ul></div>
+      <div><p class="k"><span>02</span>Methods</p>
+      <ul class="chips"><li>Usability testing</li><li>Stakeholder management</li><li>Developer handoff</li><li>Design QA</li><li>AI-assisted design</li></ul></div>
+      <div><p class="k"><span>03</span>Tools</p>
+      <ul class="chips"><li>Figma</li><li>Framer</li><li>Sketch</li><li>Webflow</li><li>Adobe CC</li><li>Miro</li><li>Notion</li><li>Google Analytics</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="edu" style="border-bottom:1.5px solid var(--ink)">
+  <h2 id="edu">Education</h2>
+  <div class="two">
+    <div>
+      <p class="k">2017 - 2021</p>
+      <p><strong>Pearl Academy</strong><br>Professional Diploma in Communication Design, Interaction Design specialisation. Pearl Excellence Award.</p>
+    </div>
+    <div>
+      <p class="k">Certifications</p>
+      <p><strong>Google UX Design Professional</strong>, Coursera<br><strong>UX Design Fundamentals</strong>, California Institute of the Arts<br><strong>AI for Everyone</strong>, DeepLearning.AI</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>Prefer a file? The PDF is one page and reads cleanly in applicant tracking systems.</p>
+  <a class="btn btn-accent" href="../Ankush_Meena_Resume.pdf" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-5-5m5 5l5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Download PDF</a>
+</footer>
+</div>
+</body>
+</html>
