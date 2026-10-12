@@ -85,7 +85,7 @@ h2{margin:0;font-size:clamp(30px,3.2vw,40px);letter-spacing:-.03em;font-weight:7
 /* tracks */
 #work{padding:24px 0 96px}
 .tracks{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--line-strong);border-bottom:1.5px solid var(--line-strong)}
-.track{display:grid;grid-template-columns:40px minmax(220px,300px) minmax(0,1fr) auto;align-items:center;gap:20px 32px;padding:24px 12px;border-radius:6px;transition:background-color .25s ease,transform .25s var(--ease)}
+.track{position:relative;cursor:pointer;display:grid;grid-template-columns:40px minmax(220px,300px) minmax(0,1fr) auto;align-items:center;gap:20px 32px;padding:24px 12px;border-radius:6px;transition:background-color .25s ease,transform .25s var(--ease)}
 .track+.track{border-top:1px solid var(--line)}
 .track:hover{background:var(--hover);transform:translateY(-2px)}
 .num{font-family:var(--mono);font-size:14px;position:relative;height:16px}
@@ -95,12 +95,18 @@ h2{margin:0;font-size:clamp(30px,3.2vw,40px);letter-spacing:-.03em;font-weight:7
 .track:hover .eq i,.track:focus-within .eq i{animation:eq .8s ease-in-out infinite}
 .eq i:nth-child(2){animation-delay:.2s!important}.eq i:nth-child(3){animation-delay:.4s!important}
 .track:hover .code,.track:focus-within .code{opacity:0}
-.thumb-btn{position:relative;display:block;width:100%;aspect-ratio:16/9;border:0;padding:0;border-radius:6px;overflow:hidden;background:#0A0C14;cursor:pointer}
+.thumb-btn{position:relative;display:block;width:100%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#0A0C14}
+.meta h3 a::after{content:"";position:absolute;inset:0;z-index:1;border-radius:6px}
+.meta h3 a:focus-visible{outline:none}
+.track:has(h3 a:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.side a{position:relative;z-index:2}
 .thumb-btn video,.thumb-btn img{width:100%;height:100%;object-fit:cover;transition:scale .6s var(--ease),filter .6s ease}
 .track:hover .thumb-btn video{scale:1.06;filter:saturate(1.15)}
-.thumb-btn .play{position:absolute;left:12px;bottom:12px;width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s var(--ease)}
+.thumb-btn .play{position:absolute;z-index:2;left:12px;bottom:12px;width:48px;height:48px;border:0;padding:0;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -8px rgba(0,0,0,.8);transition:transform .25s var(--ease),box-shadow .25s ease}
+.thumb-btn .play:hover{transform:scale(1.1);box-shadow:0 10px 26px -8px rgba(255,106,43,.6)}
+.thumb-btn .play:active{transform:scale(.96)}
+.thumb-btn .play:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .thumb-btn .play svg{width:14px;height:14px}
-.track:hover .play,.thumb-btn:focus-visible .play{opacity:1;transform:none}
 .meta{display:flex;flex-direction:column;gap:8px;min-width:0}
 .meta h3{margin:0;font-size:clamp(26px,2.6vw,34px);letter-spacing:-.025em;font-weight:700;line-height:1.1}
 .meta h3 a{text-decoration:none}
@@ -184,7 +190,6 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
   .track .thumb-btn{grid-column:1 / -1;order:-1}
   .track .num{order:0}
   .side{grid-column:2}
-  .thumb-btn .play{opacity:1;transform:none}
 }
 @media (max-width:640px){
   .wrap{padding:0 16px}
@@ -244,10 +249,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
   <ol class="tracks">
     <li class="track reveal">
       <span class="num"><span class="code">A1</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
-      <button class="thumb-btn" type="button" data-video="videos/mediscribe.mp4" data-title="MediScribe" data-len="1:44" data-case="cases/mediscribe.html#casestudy" aria-label="Watch the MediScribe walkthrough, 1 minute 44 seconds">
+      <div class="thumb-btn">
         <video class="thumb" autoplay muted loop playsinline preload="auto" poster="thumbnails/mediscribe-poster.jpg"><source src="thumbnails/mediscribe-thumb.webm" type="video/webm"><source src="thumbnails/mediscribe-thumb.mp4" type="video/mp4"></video>
-        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></span>
-      </button>
+        <button class="play" type="button" data-video="videos/mediscribe.mp4" data-case="cases/mediscribe.html#casestudy" data-title="MediScribe" data-len="1:44" aria-label="Watch the MediScribe walkthrough, 1 minute 44 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></button>
+      </div>
       <div class="meta">
         <h3><a href="cases/mediscribe.html#casestudy">MediScribe</a></h3>
         <p>An AI scribe that listens, so doctors talk to patients, not keyboards.</p>
@@ -257,10 +262,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
     </li>
     <li class="track reveal">
       <span class="num"><span class="code">A2</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
-      <button class="thumb-btn" type="button" data-video="videos/adafsa.mp4" data-title="ADAFSA Design System" data-len="1:31" data-case="cases/adafsa.html" aria-label="Watch the ADAFSA Design System walkthrough, 1 minute 31 seconds">
+      <div class="thumb-btn">
         <video class="thumb" autoplay muted loop playsinline preload="auto" poster="thumbnails/adafsa-poster.jpg"><source src="thumbnails/adafsa-thumb.webm" type="video/webm"><source src="thumbnails/adafsa-thumb.mp4" type="video/mp4"></video>
-        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></span>
-      </button>
+        <button class="play" type="button" data-video="videos/adafsa.mp4" data-case="cases/adafsa.html" data-title="ADAFSA Design System" data-len="1:31" aria-label="Watch the ADAFSA Design System walkthrough, 1 minute 31 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></button>
+      </div>
       <div class="meta">
         <h3><a href="cases/adafsa.html">ADAFSA Design System</a></h3>
         <p>34 colours became 9 tokens, and 20 components got 87 variants, built Arabic-first.</p>
@@ -270,10 +275,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
     </li>
     <li class="track reveal">
       <span class="num"><span class="code">A3</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
-      <button class="thumb-btn" type="button" data-video="videos/bakerhughes.mp4" data-title="Baker Hughes" data-len="1:41" data-case="cases/bakerhughes.html#casestudy" aria-label="Watch the Baker Hughes walkthrough, 1 minute 41 seconds">
+      <div class="thumb-btn">
         <video class="thumb" autoplay muted loop playsinline preload="auto" poster="thumbnails/bakerhughes-poster.jpg"><source src="thumbnails/bakerhughes-thumb.webm" type="video/webm"><source src="thumbnails/bakerhughes-thumb.mp4" type="video/mp4"></video>
-        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></span>
-      </button>
+        <button class="play" type="button" data-video="videos/bakerhughes.mp4" data-case="cases/bakerhughes.html#casestudy" data-title="Baker Hughes" data-len="1:41" aria-label="Watch the Baker Hughes walkthrough, 1 minute 41 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></button>
+      </div>
       <div class="meta">
         <h3><a href="cases/bakerhughes.html#casestudy">Baker Hughes</a></h3>
         <p>A 40+ field asset form rebuilt into three guided sections for offshore engineers.</p>
@@ -283,10 +288,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
     </li>
     <li class="track reveal">
       <span class="num"><span class="code">A4</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
-      <button class="thumb-btn" type="button" data-video="videos/moments.mp4" data-title="MOMents" data-len="1:27" data-case="cases/moments.html" aria-label="Watch the MOMents walkthrough, 1 minute 27 seconds">
+      <div class="thumb-btn">
         <video class="thumb" autoplay muted loop playsinline preload="auto" poster="thumbnails/moments-poster.jpg"><source src="thumbnails/moments-thumb.webm" type="video/webm"><source src="thumbnails/moments-thumb.mp4" type="video/mp4"></video>
-        <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></span>
-      </button>
+        <button class="play" type="button" data-video="videos/moments.mp4" data-case="cases/moments.html" data-title="MOMents" data-len="1:27" aria-label="Watch the MOMents walkthrough, 1 minute 27 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l14-8z" fill="currentColor"/></svg></button>
+      </div>
       <div class="meta">
         <h3><a href="cases/moments.html">MOMents</a></h3>
         <p>A pregnancy wellness app, from 8 interviews to an investor prototype.</p>
