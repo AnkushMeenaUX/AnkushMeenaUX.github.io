@@ -67,7 +67,7 @@ a:hover{color:#fff}
 .sleeve{position:relative;aspect-ratio:1/1;background:var(--accent);color:var(--on-accent);border-radius:4px;padding:clamp(20px,4vw,36px);display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .sleeve-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .sleeve-name{min-width:0;font-size:clamp(46px,6.6vw,80px);line-height:.86;letter-spacing:-.05em;font-weight:700}
-.sleeve img{flex:none;width:clamp(60px,7vw,96px);aspect-ratio:1/1;border-radius:50%;object-fit:cover;filter:grayscale(1) contrast(1.1)}
+.sleeve img{flex:none;width:clamp(56px,7vw,96px);height:auto;aspect-ratio:1/1;border-radius:50%;object-fit:cover;filter:grayscale(1) contrast(1.1)}
 .sleeve-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;font-family:var(--mono);font-size:13px;line-height:1.5}
 .hero-copy{flex:1 1 400px;min-width:0;display:flex;flex-direction:column;gap:24px}
 .hero h1{margin:0;font-size:clamp(36px,4.4vw,54px);line-height:1.04;letter-spacing:-.035em;font-weight:700}
@@ -193,7 +193,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
 @media (max-width:640px){
   .wrap{padding:0 16px}
   .hero{padding:24px 0 56px;gap:40px}
-  .sleeve-wrap{flex-basis:100%}
+  .sleeve-wrap{flex-basis:100%;padding-right:34%}
+  .sleeve-name{font-size:clamp(34px,11vw,46px)}
+  .sleeve-foot{font-size:11px}
+  .vinyl{top:4%;bottom:4%}
   .photos{grid-template-columns:1fr 1fr}
   .photos img:last-child{display:none}
   .player iframe{height:380px}
