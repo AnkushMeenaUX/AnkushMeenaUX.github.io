@@ -125,8 +125,11 @@ h2{margin:0;font-size:clamp(30px,3.2vw,40px);letter-spacing:-.03em;font-weight:7
 .player-note{display:flex;align-items:center;gap:12px;padding:12px 6px 4px;font-family:var(--mono);font-size:12px;color:var(--muted)}
 .mini{width:28px;height:28px;flex:none;border-radius:50%;background:repeating-radial-gradient(circle at center,#3A3A3A 0 1px,#1D1D1D 1px 3px);display:flex;align-items:center;justify-content:center}
 .mini::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
-.photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.photos img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px}
+.photos{display:flex;gap:12px;align-items:flex-start}
+.photos img{min-width:0;width:100%;height:auto;object-fit:cover;border-radius:4px}
+.photos .p-paint{flex:.8 1 0;aspect-ratio:4/5}
+.photos .p-desk{flex:1.762 1 0;aspect-ratio:1600/908}
+.photos .p-port{flex:1 1 0;aspect-ratio:1/1}
 
 /* credits */
 .credits{padding:64px 0;border-top:1.5px solid var(--line-strong);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:40px}
@@ -197,8 +200,10 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
   .sleeve-name{font-size:clamp(34px,11vw,46px)}
   .sleeve-foot{font-size:11px}
   .vinyl{top:4%;bottom:4%}
-  .photos{grid-template-columns:1fr 1fr}
-  .photos img:last-child{display:none}
+  .photos{flex-wrap:wrap}
+  .photos .p-desk{order:-1;flex-basis:100%}
+  .photos .p-paint{flex:.8 1 0}
+  .photos .p-port{flex:1 1 0}
   .player iframe{height:380px}
   .dlg-title .mono{display:none}
 }
@@ -325,9 +330,9 @@ body:has(.track:hover) .vinyl{animation:slideOut .9s var(--ease) .2s both,spin 2
     </div>
   </div>
   <div class="photos">
-    <img class="reveal" src="images/me-2.jpg" alt="My gaming desk setup" loading="lazy">
-    <img class="reveal" src="images/me-4.jpg" alt="Me at night in a black coat" loading="lazy">
-    <img class="reveal" src="images/me-3.jpg" alt="Me riding a BMX bike" loading="lazy">
+    <img class="reveal p-paint" src="images/off-painting.jpg" alt="A small painting of yellow roses in a blue vase, done on a card box, held in my hand" width="1000" height="1250" loading="lazy">
+    <img class="reveal p-desk" src="images/off-desk.jpg" alt="My desk setup at night: two monitors, a lit keyboard and a lo-fi café wallpaper" width="1600" height="908" loading="lazy">
+    <img class="reveal p-port" src="images/off-portrait.jpg" alt="Black and white portrait of me in profile" width="736" height="736" loading="lazy">
   </div>
 </section>
 
